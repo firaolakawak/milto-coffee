@@ -1,0 +1,42 @@
+{
+  "name": "CoffeeOrigin",
+  "type": "object",
+  "properties": {
+    "region": {
+      "type": "string"
+    },
+    "region_am": {
+      "type": "string"
+    },
+    "story": {
+      "type": "string"
+    },
+    "story_am": {
+      "type": "string"
+    },
+    "flavor_profile": {
+      "type": "string"
+    },
+    "altitude": {
+      "type": "string"
+    },
+    "processing_method": {
+      "type": "string"
+    },
+    "farmer_info": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "region"
+  ]
+}

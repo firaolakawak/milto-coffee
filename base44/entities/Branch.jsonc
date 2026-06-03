@@ -1,0 +1,48 @@
+{
+  "name": "Branch",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Branch name"
+    },
+    "name_am": {
+      "type": "string",
+      "description": "Branch name in Amharic"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "opening_hours": {
+      "type": "string",
+      "description": "e.g. 6:00 AM - 10:00 PM"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "estimated_wait_minutes": {
+      "type": "number",
+      "default": 5
+    }
+  },
+  "required": [
+    "name",
+    "address"
+  ]
+}

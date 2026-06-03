@@ -1,0 +1,104 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_phone": {
+      "type": "string"
+    },
+    "branch_id": {
+      "type": "string"
+    },
+    "branch_name": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "size": {
+            "type": "string"
+          },
+          "customizations": {
+            "type": "object"
+          },
+          "unit_price": {
+            "type": "number"
+          },
+          "total_price": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "discount": {
+      "type": "number",
+      "default": 0
+    },
+    "total": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "received",
+        "preparing",
+        "ready",
+        "completed",
+        "cancelled"
+      ],
+      "default": "received"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "telebirr",
+        "cbe_birr",
+        "amole",
+        "cash",
+        "visa",
+        "mastercard"
+      ]
+    },
+    "pickup_time": {
+      "type": "string"
+    },
+    "promo_code": {
+      "type": "string"
+    },
+    "loyalty_points_earned": {
+      "type": "number",
+      "default": 0
+    },
+    "loyalty_points_redeemed": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "branch_id",
+    "items",
+    "total"
+  ]
+}

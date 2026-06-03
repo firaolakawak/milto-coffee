@@ -1,0 +1,61 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "title_am": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "description_am": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "tasting",
+        "brewing_workshop",
+        "roasting_workshop",
+        "community",
+        "promotion"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "branch_id": {
+      "type": "string"
+    },
+    "branch_name": {
+      "type": "string"
+    },
+    "capacity": {
+      "type": "number"
+    },
+    "registered_count": {
+      "type": "number",
+      "default": 0
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "price": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title",
+    "type",
+    "date"
+  ]
+}

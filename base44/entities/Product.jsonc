@@ -1,0 +1,84 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "name_am": {
+      "type": "string",
+      "description": "Name in Amharic"
+    },
+    "description": {
+      "type": "string"
+    },
+    "description_am": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "espresso",
+        "macchiato",
+        "cappuccino",
+        "latte",
+        "cold_brew",
+        "traditional",
+        "specialty",
+        "pastries",
+        "snacks",
+        "beans"
+      ]
+    },
+    "price": {
+      "type": "number"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "is_available": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "sizes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "price_modifier": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "customizations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "price"
+  ]
+}

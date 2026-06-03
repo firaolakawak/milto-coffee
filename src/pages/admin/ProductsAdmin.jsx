@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRef } from 'react';
 
 const CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'cold_brew', 'traditional', 'specialty', 'pastries', 'snacks', 'beans'];
 const emptyProduct = { name: '', name_am: '', description: '', description_am: '', category: 'espresso', price: 0, image_url: '', is_available: true, is_featured: false };
@@ -40,13 +41,65 @@ export default function ProductsAdmin() {
   const openNew = () => { setEditing(null); setForm(emptyProduct); setOpen(true); };
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
+  const fileInputRef = useRef(null);
   const filtered = filterCat === 'all' ? products : products.filter(p => p.category === filterCat);
+
+  const handleExport = () => {
+    const headers = ['name', 'name_am', 'category', 'price', 'description', 'description_am', 'image_url', 'is_available', 'is_featured'];
+    const rows = products.map(p => headers.map(h => {
+      const val = p[h] ?? '';
+      return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
+    }).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'milto_menu.csv'; a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Menu exported!');
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const text = ev.target.result;
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      const rows = lines.slice(1).map(line => {
+        const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|^(?=,)|(?<=,)$)/g) || line.split(',');
+        const obj = {};
+        headers.forEach((h, i) => {
+          let v = (vals[i] || '').trim().replace(/^"|"$/g, '');
+          if (h === 'price') v = Number(v) || 0;
+          else if (h === 'is_available' || h === 'is_featured') v = v === 'true' || v === '1';
+          obj[h] = v;
+        });
+        return obj;
+      }).filter(r => r.name);
+      let count = 0;
+      for (const row of rows) {
+        await base44.entities.Product.create({ ...emptyProduct, ...row });
+        count++;
+      }
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
+      toast.success(`Imported ${count} products!`);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <div><h1 className="font-display text-2xl font-bold text-primary">Products</h1><p className="text-sm text-muted-foreground">Manage your menu items</p></div>
-        <Button onClick={openNew} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full"><Plus className="mr-2 h-4 w-4" /> Add Product</Button>
+        <div className="flex gap-2">
+          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleImport} />
+          <Button variant="outline" onClick={() => fileInputRef.current.click()} className="rounded-full"><Upload className="mr-2 h-4 w-4" /> Import CSV</Button>
+          <Button variant="outline" onClick={handleExport} className="rounded-full"><Download className="mr-2 h-4 w-4" /> Export CSV</Button>
+          <Button onClick={openNew} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full"><Plus className="mr-2 h-4 w-4" /> Add Product</Button>
+        </div>
       </div>
 
       <Tabs value={filterCat} onValueChange={setFilterCat} className="mb-6">

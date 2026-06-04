@@ -3,8 +3,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Plus, Minus, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
@@ -73,35 +71,45 @@ export default function ProductCard({ product }) {
               <>
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Size</Label>
-                  <RadioGroup value={size} onValueChange={setSize} className="flex gap-3">
+                  <div className="flex gap-2">
                     {SIZES.map(s => (
-                      <div key={s.name} className="flex items-center gap-2">
-                        <RadioGroupItem value={s.name} id={`size-${s.name}`} />
-                        <Label htmlFor={`size-${s.name}`} className="text-sm cursor-pointer">
-                          {s.name} ({s.price_modifier >= 0 ? '+' : ''}{s.price_modifier} ETB)
-                        </Label>
-                      </div>
+                      <button
+                        key={s.name}
+                        onClick={() => setSize(s.name)}
+                        className={`flex-1 py-2 px-3 rounded-full text-sm font-medium border transition-all ${size === s.name ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
+                      >
+                        {s.name}<br />
+                        <span className="text-xs opacity-75">{s.price_modifier >= 0 ? '+' : ''}{s.price_modifier} ETB</span>
+                      </button>
                     ))}
-                  </RadioGroup>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Milk</Label>
-                    <Select value={milk} onValueChange={setMilk}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {MILK_OPTIONS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
                   </div>
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Sugar</Label>
-                    <Select value={sugar} onValueChange={setSugar}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {SUGAR_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Milk</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {MILK_OPTIONS.map(m => (
+                      <button
+                        key={m}
+                        onClick={() => setMilk(m)}
+                        className={`py-1.5 px-3 rounded-full text-sm border transition-all ${milk === m ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Sugar</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {SUGAR_OPTIONS.map(s => (
+                      <button
+                        key={s}
+                        onClick={() => setSugar(s)}
+                        className={`py-1.5 px-3 rounded-full text-sm border transition-all ${sugar === s ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </>

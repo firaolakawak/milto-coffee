@@ -22,12 +22,17 @@ export default function AdminLayout() {
   return (
     <div className="h-screen bg-background flex overflow-hidden">
       <aside className="hidden lg:flex w-64 bg-sidebar text-sidebar-foreground flex-col border-r border-sidebar-border overflow-y-auto">
-        <div className="p-5 border-b border-sidebar-border">
-          <Link to="/" className="flex items-center gap-2">
-            <Coffee className="h-6 w-6 text-sidebar-primary" />
-            <span className="font-display font-bold text-lg">Milto Admin</span>
-          </Link>
-        </div>
+      <div className="p-5 border-b border-sidebar-border">
+  <Link to="/" className="flex items-center gap-2">
+    <img
+      src="https://base44.com/logo_v2.svg"
+      alt="Milto Logo"
+      className="h-7 w-auto"
+    />
+    <span className="font-display font-bold text-lg">Milto Admin</span>
+  </Link>
+</div>
+
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map(item => (
             <Link key={item.path} to={item.path}>

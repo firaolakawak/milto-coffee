@@ -1,3 +1,4 @@
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Pencil, Trash2, Upload, Download, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import React, { useState, useRef } from 'react';
 
 const CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'cold_brew', 'traditional', 'specialty', 'pastries', 'snacks', 'beans'];
 const emptyProduct = { name: '', name_am: '', description: '', description_am: '', category: 'espresso', price: 0, image_url: '', is_available: true, is_featured: false };
@@ -22,7 +22,10 @@ export default function ProductsAdmin() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyProduct);
   const [filterCat, setFilterCat] = useState('all');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const qc = useQueryClient();
+  const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
 
   const { data: products = [] } = useQuery({ queryKey: ['admin-products'], queryFn: () => base44.entities.Product.list('-created_date', 200) });
 
@@ -40,9 +43,6 @@ export default function ProductsAdmin() {
   const openNew = () => { setEditing(null); setForm(emptyProduct); setOpen(true); };
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
-  const fileInputRef = useRef(null);
-  const imageInputRef = useRef(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const filtered = filterCat === 'all' ? products : products.filter(p => p.category === filterCat);
 
   const handleImageUpload = async (e) => {

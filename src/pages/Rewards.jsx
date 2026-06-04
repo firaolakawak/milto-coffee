@@ -70,6 +70,8 @@ export default function Rewards() {
     enabled: !!user,
   });
 
+  const account = accounts[0] || { points: 0, total_points_earned: 0, tier: 'bronze', total_orders: 0, badges: [], referral_code: null };
+
   // Count referrals and auto-refresh
   useEffect(() => {
     if (account.referral_code) {
@@ -89,8 +91,6 @@ export default function Rewards() {
     });
     return unsubscribe;
   }, [account.referral_code]);
-
-  const account = accounts[0] || { points: 0, total_points_earned: 0, tier: 'bronze', total_orders: 0, badges: [] };
   const tier = tierConfig[account.tier] || tierConfig.bronze;
   const TierIcon = tier.icon;
   const progress = tier.pointsNeeded ? (account.total_points_earned / tier.pointsNeeded) * 100 : 100;

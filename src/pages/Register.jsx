@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, Phone } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
@@ -14,10 +14,12 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [showPhoneStep, setShowPhoneStep] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,10 +46,28 @@ export default function Register() {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+        setShowPhoneStep(true);
       }
-      window.location.href = "/";
     } catch (err) {
       setError(err.message || "Invalid verification code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneSubmit = async (e) => {
+    e.preventDefault();
+    if (!phone.trim()) {
+      setError("Phone number is required");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      await base44.auth.updateMe({ phone });
+      window.location.href = "/";
+    } catch (err) {
+      setError(err.message || "Failed to save phone number");
     } finally {
       setLoading(false);
     }
@@ -69,6 +89,50 @@ export default function Register() {
   const handleGoogle = () => {
     base44.auth.loginWithProvider("google", "/");
   };
+
+  if (showPhoneStep) {
+    return (
+      <AuthLayout
+        icon={Phone}
+        title="Add your phone number"
+        subtitle="This helps us reach you with order updates"
+      >
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+            {error}
+          </div>
+        )}
+        <form onSubmit={handlePhoneSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="phone">Mobile Phone Number</Label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+971 50 123 4567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="pl-10 h-12"
+                autoFocus
+                required
+              />
+            </div>
+          </div>
+          <Button type="submit" className="w-full h-12 font-medium" disabled={loading || !phone.trim()}>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Continue"
+            )}
+          </Button>
+        </form>
+      </AuthLayout>
+    );
+  }
 
   if (showOtp) {
     return (

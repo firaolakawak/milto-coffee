@@ -296,7 +296,7 @@ export default function Rewards() {
             ))}
           </ul>
           <p className="text-xs text-muted-foreground mt-6 pt-4 border-t border-border">
-            Last updated: June 2024. For questions about our rewards program, contact support@miltocoffe.com
+            Last updated: June 2026. For questions about our rewards program, contact support@miltocoffe.com
           </p>
         </CardContent>
       </Card>

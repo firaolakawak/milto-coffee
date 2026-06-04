@@ -103,7 +103,8 @@ export default function ProductsAdmin() {
   };
 
   return (
-    <div className="p-6">
+    <div className="flex flex-col h-full">
+      <div className="sticky top-0 z-10 bg-background px-6 pt-6 pb-4 border-b border-border">
       <div className="flex items-center justify-between mb-4">
         <div><h1 className="font-display text-2xl font-bold text-primary">Products</h1><p className="text-sm text-muted-foreground">Manage your menu items</p></div>
         <div className="flex gap-2">
@@ -114,13 +115,15 @@ export default function ProductsAdmin() {
         </div>
       </div>
 
-      <Tabs value={filterCat} onValueChange={setFilterCat} className="mb-6">
+      <Tabs value={filterCat} onValueChange={setFilterCat}>
         <TabsList className="flex flex-wrap h-auto gap-1 bg-transparent p-0">
           <TabsTrigger value="all" className="rounded-full px-3 py-1 text-xs data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">All</TabsTrigger>
           {CATEGORIES.map(c => <TabsTrigger key={c} value={c} className="rounded-full px-3 py-1 text-xs capitalize data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">{c.replace('_', ' ')}</TabsTrigger>)}
         </TabsList>
       </Tabs>
+      </div>
 
+      <div className="flex-1 overflow-y-auto px-6 py-4">
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filtered.map(p => (
           <Card key={p.id} className="border-0 shadow-sm overflow-hidden">
@@ -151,6 +154,7 @@ export default function ProductsAdmin() {
             </CardContent>
           </Card>
         ))}
+      </div>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

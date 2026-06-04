@@ -6,12 +6,12 @@ import { LayoutDashboard, Store, Coffee, ClipboardList, Award, Calendar, Megapho
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/orders', icon: ClipboardList, label: 'Orders' },
-    { path: '/admin/products', icon: Coffee, label: 'Products' },
-     { path: '/admin/promotions', icon: Megaphone, label: 'Promotions' },
-    { path: '/admin/stock', icon: PackageSearch, label: 'Stock Inventory' },
+  { path: '/admin/products', icon: Coffee, label: 'Products' },
+  { path: '/admin/promotions', icon: Megaphone, label: 'Promotions' },
+  { path: '/admin/stock', icon: PackageSearch, label: 'Stock Inventory' },
   { path: '/admin/loyalty', icon: Award, label: 'Loyalty' },
   { path: '/admin/events', icon: Calendar, label: 'Events' },
- 
+
   { path: '/admin/branches', icon: Store, label: 'Branches' },
   { path: '/admin/origins', icon: Leaf, label: 'Origins' },
 ];
@@ -22,25 +22,23 @@ export default function AdminLayout() {
   return (
     <div className="h-screen bg-background flex overflow-hidden">
       <aside className="hidden lg:flex w-64 bg-sidebar text-sidebar-foreground flex-col border-r border-sidebar-border overflow-y-auto">
-      <div className="p-5 border-b border-sidebar-border">
-  <Link to="/" className="flex items-center gap-2">
-    <img
-      src="https://base44.com/logo_v2.svg"
-      alt="Milto Logo"
-      className="h-7 w-auto"
-    />
-    <span className="font-display font-bold text-lg">Milto Admin</span>
-  </Link>
-</div>
+        <div className="p-5 border-b border-sidebar-border">
+          <Link to="/" className="flex items-center gap-2">
+            <img
+              src="https://media.base44.com/images/public/6a2091b55874dccfc09ef00c/2307f935d_milto.png" alt="Milto Coffee"
+              className="h-7 w-auto"
+            />
+            <span className="font-display font-bold text-lg">Milto Admin</span>
+          </Link>
+        </div>
 
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map(item => (
             <Link key={item.path} to={item.path}>
               <Button
                 variant="ghost"
-                className={`w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                  pathname === item.path ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
-                }`}
+                className={`w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${pathname === item.path ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''
+                  }`}
               >
                 <item.icon className="h-4 w-4" /> {item.label}
               </Button>

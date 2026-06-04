@@ -29,6 +29,12 @@ export default function OriginsPreview() {
               transition={{ delay: i * 0.15 }}
               className="relative h-72 rounded-2xl overflow-hidden group cursor-pointer"
             >
+            <img 
+  src="/your-image.jpg"
+  alt={region.name}
+  className="absolute inset-0 w-full h-full object-cover"
+/>
+
               <div className={`absolute inset-0 bg-gradient-to-t ${region.color}`} />
               <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
                 <div className="flex items-center gap-2 mb-2">

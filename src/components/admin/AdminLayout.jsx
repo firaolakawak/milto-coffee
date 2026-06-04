@@ -1,13 +1,14 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Store, Coffee, ClipboardList, Award, Calendar, Megaphone, ArrowLeft, Leaf } from 'lucide-react';
+import { LayoutDashboard, Store, Coffee, ClipboardList, Award, Calendar, Megaphone, ArrowLeft, Leaf, PackageSearch } from 'lucide-react';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/branches', icon: Store, label: 'Branches' },
   { path: '/admin/products', icon: Coffee, label: 'Products' },
   { path: '/admin/orders', icon: ClipboardList, label: 'Orders' },
+  { path: '/admin/stock', icon: PackageSearch, label: 'Stock Inventory' },
   { path: '/admin/loyalty', icon: Award, label: 'Loyalty' },
   { path: '/admin/events', icon: Calendar, label: 'Events' },
   { path: '/admin/promotions', icon: Megaphone, label: 'Promotions' },

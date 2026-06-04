@@ -36,6 +36,7 @@ import LoyaltyAdmin from '@/pages/admin/LoyaltyAdmin';
 import EventsAdmin from '@/pages/admin/EventsAdmin';
 import PromotionsAdmin from '@/pages/admin/PromotionsAdmin';
 import OriginsAdmin from '@/pages/admin/OriginsAdmin';
+import StockInventory from '@/pages/admin/StockInventory';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -91,6 +92,7 @@ const AuthenticatedApp = () => {
             <Route path="/admin/events" element={<EventsAdmin />} />
             <Route path="/admin/promotions" element={<PromotionsAdmin />} />
             <Route path="/admin/origins" element={<OriginsAdmin />} />
+            <Route path="/admin/stock" element={<StockInventory />} />
           </Route>
         </Route>
 

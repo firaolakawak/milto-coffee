@@ -21,6 +21,44 @@ const CATEGORIES = [
   { value: 'beans', label: 'Coffee Beans' },
 ];
 
+// Base drink keywords used for grouping
+const BASE_NAMES = [
+  'Macchiato', 'Latte', 'Cappuccino', 'Espresso',
+  'Cold Brew', 'Hot Chocolate', 'Hot Caramel', 'Tea', 'Coffee',
+];
+
+function getProductGroup(productName) {
+  const name = productName.trim();
+
+  for (const base of BASE_NAMES) {
+    if (name.toLowerCase().includes(base.toLowerCase())) {
+      const variant = name.replace(new RegExp(base, 'gi'), '').trim();
+      return { baseName: base, variantName: variant || 'Classic' };
+    }
+  }
+
+  // Special: "Milk with X"
+  if (name.toLowerCase().startsWith('milk with')) {
+    const variant = name.substring(9).trim();
+    return { baseName: 'Milk with...', variantName: variant || 'Classic' };
+  }
+
+  // Standalone product - its own group
+  return { baseName: name, variantName: 'Classic' };
+}
+
+function groupProducts(products) {
+  const map = {};
+  products.forEach(p => {
+    const { baseName, variantName } = getProductGroup(p.name);
+    if (!map[baseName]) {
+      map[baseName] = { baseName, category: p.category, products: [] };
+    }
+    map[baseName].products.push({ ...p, variantName });
+  });
+  return Object.values(map);
+}
+
 export default function Menu() {
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
@@ -32,9 +70,18 @@ export default function Menu() {
 
   const filtered = products.filter(p => {
     if (category !== 'all' && p.category !== category) return false;
-    if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const nameMatch = p.name?.toLowerCase().includes(q);
+      // Also match base group name
+      const { baseName } = getProductGroup(p.name);
+      const baseMatch = baseName.toLowerCase().includes(q);
+      if (!nameMatch && !baseMatch) return false;
+    }
     return p.is_available !== false;
   });
+
+  const grouped = groupProducts(filtered);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -79,15 +126,15 @@ export default function Menu() {
             </div>
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : grouped.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-4xl mb-4">☕</p>
           <p className="text-muted-foreground">No items found. Try a different category or search term.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.map(product => (
-            <ProductCard key={product.id} product={product} />
+          {grouped.map(group => (
+            <ProductCard key={group.baseName} group={group} />
           ))}
         </div>
       )}

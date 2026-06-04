@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Minus, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { toast } from 'sonner';
@@ -18,8 +18,9 @@ const MILK_OPTIONS = ['Whole', 'Skim', 'Oat', 'Almond', 'None'];
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
 const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ group }) {
   const [open, setOpen] = useState(false);
+  const [activeProductId, setActiveProductId] = useState(null);
   const [size, setSize] = useState('Medium');
   const [milk, setMilk] = useState('Whole');
   const [sugar, setSugar] = useState('Regular');
@@ -27,40 +28,83 @@ export default function ProductCard({ product }) {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
 
-  const isBeverage = !['pastries', 'snacks', 'beans'].includes(product.category);
+  const products = group.products;
+  const primaryProduct = products[0];
+  const isGrouped = products.length > 1;
+
+  // The currently active product in the dialog
+  const activeProduct = products.find(p => p.id === activeProductId) || primaryProduct;
+
+  const isBeverage = !['pastries', 'snacks', 'beans'].includes(activeProduct.category);
   const sizeData = SIZES.find(s => s.name === size);
-  const unitPrice = product.price + (sizeData?.price_modifier || 0);
+  const unitPrice = activeProduct.price + (sizeData?.price_modifier || 0);
+
+  // Price display on the card: show range if variants differ in price
+  const prices = products.map(p => p.price);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const priceLabel = minPrice === maxPrice ? `${minPrice} ETB` : `${minPrice}–${maxPrice} ETB`;
+
+  const handleOpen = () => {
+    setActiveProductId(primaryProduct.id);
+    setSize('Medium');
+    setMilk('Whole');
+    setSugar('Regular');
+    setRoast('Regular');
+    setQuantity(1);
+    setOpen(true);
+  };
+
+  const handleTabChange = (productId) => {
+    setActiveProductId(productId);
+    setSize('Medium');
+    setMilk('Whole');
+    setSugar('Regular');
+    setRoast('Regular');
+    setQuantity(1);
+  };
 
   const handleAdd = () => {
     const customizations = isBeverage ? { milk, sugar, roast } : {};
-    addItem({ ...product, sizes: SIZES }, quantity, size, customizations);
-    toast.success(`Added ${product.name} to cart`);
+    addItem({ ...activeProduct, sizes: SIZES }, quantity, size, customizations);
+    toast.success(`Added ${activeProduct.name} to cart`);
     setOpen(false);
     setQuantity(1);
   };
 
+  // Image from the first product that has one
+  const cardImage = products.find(p => p.image_url)?.image_url;
+
   return (
     <>
-      <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer" onClick={() => setOpen(true)}>
+      <Card
+        className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
+        onClick={handleOpen}
+      >
         <div className="h-40 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center overflow-hidden relative">
-          {product.image_url ? (
+          {cardImage ? (
             <img
-              src={product.image_url}
-              alt={product.name}
+              src={cardImage}
+              alt={group.baseName}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
             />
           ) : null}
           <span
             className="text-5xl opacity-60 absolute inset-0 flex items-center justify-center"
-            style={{ display: product.image_url ? 'none' : 'flex' }}
+            style={{ display: cardImage ? 'none' : 'flex' }}
           >☕</span>
         </div>
         <CardContent className="p-4">
-          <h3 className="font-semibold text-primary text-sm">{product.name}</h3>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{product.description}</p>
+          <h3 className="font-semibold text-primary text-sm">{group.baseName}</h3>
+          {isGrouped && (
+            <p className="text-xs text-muted-foreground mt-0.5">{products.length} variants</p>
+          )}
+          {!isGrouped && primaryProduct.description && (
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{primaryProduct.description}</p>
+          )}
           <div className="flex items-center justify-between mt-3">
-            <span className="font-bold text-secondary">{product.price} ETB</span>
+            <span className="font-bold text-secondary">{priceLabel}</span>
             <Button size="sm" variant="secondary" className="h-8 w-8 p-0 rounded-full">
               <Plus className="h-4 w-4" />
             </Button>
@@ -69,12 +113,35 @@ export default function ProductCard({ product }) {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl">{product.name}</DialogTitle>
+            <DialogTitle className="font-display text-xl">{group.baseName}</DialogTitle>
           </DialogHeader>
+
+          {/* Variant Tabs */}
+          {isGrouped && (
+            <div className="mb-2">
+              <Label className="text-sm font-medium mb-2 block">Choose Variant</Label>
+              <Tabs value={activeProduct.id} onValueChange={handleTabChange}>
+                <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 rounded-xl">
+                  {products.map(p => (
+                    <TabsTrigger
+                      key={p.id}
+                      value={p.id}
+                      className="rounded-lg text-xs px-3 py-1.5 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+                    >
+                      {p.variantName}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+
           <div className="space-y-5">
-            {product.description && <p className="text-sm text-muted-foreground">{product.description}</p>}
+            {activeProduct.description && (
+              <p className="text-sm text-muted-foreground">{activeProduct.description}</p>
+            )}
 
             {isBeverage && (
               <>

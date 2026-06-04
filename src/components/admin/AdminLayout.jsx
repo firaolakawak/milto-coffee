@@ -5,13 +5,14 @@ import { LayoutDashboard, Store, Coffee, ClipboardList, Award, Calendar, Megapho
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/admin/branches', icon: Store, label: 'Branches' },
-  { path: '/admin/products', icon: Coffee, label: 'Products' },
   { path: '/admin/orders', icon: ClipboardList, label: 'Orders' },
-  { path: '/admin/stock', icon: PackageSearch, label: 'Stock Inventory' },
+    { path: '/admin/products', icon: Coffee, label: 'Products' },
+     { path: '/admin/promotions', icon: Megaphone, label: 'Promotions' },
+    { path: '/admin/stock', icon: PackageSearch, label: 'Stock Inventory' },
   { path: '/admin/loyalty', icon: Award, label: 'Loyalty' },
   { path: '/admin/events', icon: Calendar, label: 'Events' },
-  { path: '/admin/promotions', icon: Megaphone, label: 'Promotions' },
+ 
+  { path: '/admin/branches', icon: Store, label: 'Branches' },
   { path: '/admin/origins', icon: Leaf, label: 'Origins' },
 ];
 

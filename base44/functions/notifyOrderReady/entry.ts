@@ -5,22 +5,32 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const payload = await req.json();
 
-    const { event, data } = payload;
-
-    // Only act on status changing to "ready"
-    if (data?.status !== 'ready') {
-      return Response.json({ skipped: true });
-    }
-
+    const { data } = payload;
     const order = data;
-    const userId = order.created_by_id;
+    const userId = order?.created_by_id;
 
-    if (userId) {
-      await base44.asServiceRole.entities.Notification.create({
-        user_id: userId,
+    let notification = null;
+
+    if (order?.status === 'ready') {
+      notification = {
         title: '☕ Your order is ready!',
         message: `Order #${order.order_number || order.id?.slice(-6)} is ready for pickup at ${order.branch_name || 'the store'}. Please collect it now.`,
         type: 'order_ready',
+      };
+    } else if (order?.status === 'out_for_delivery') {
+      notification = {
+        title: '🛵 Your order is on the way!',
+        message: `Order #${order.order_number || order.id?.slice(-6)} is out for delivery from ${order.branch_name || 'the store'}. Get ready!`,
+        type: 'order_ready',
+      };
+    }
+
+    if (notification && userId) {
+      await base44.asServiceRole.entities.Notification.create({
+        user_id: userId,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
         reference_id: order.id,
         is_read: false,
       });

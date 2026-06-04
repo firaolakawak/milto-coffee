@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import StockAlerts from '@/components/admin/StockAlerts';
 import SalesTrendsChart from '@/components/admin/SalesTrendsChart';
 import LowStockTable from '@/components/admin/LowStockTable';
+import BranchPerformanceChart from '@/components/admin/BranchPerformanceChart';
 
 export default function Dashboard() {
   const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: () => base44.entities.Order.list('-created_date', 100) });
@@ -47,6 +48,7 @@ export default function Dashboard() {
       <StockAlerts />
       <LowStockTable />
       <SalesTrendsChart orders={orders} />
+      <BranchPerformanceChart orders={orders} branches={branches} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map(stat => (

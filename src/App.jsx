@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -9,37 +10,41 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { CartProvider } from '@/lib/CartContext';
-
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
-
 import AppLayout from '@/components/layout/AppLayout';
 import AdminLayout from '@/components/admin/AdminLayout';
 
-import Home from '@/pages/Home';
-import Menu from '@/pages/Menu';
-import Cart from '@/pages/Cart';
-import Orders from '@/pages/Orders';
-import OrderTracking from '@/pages/OrderTracking';
-import Origins from '@/pages/Origins';
-import Stores from '@/pages/Stores';
-import Rewards from '@/pages/Rewards';
-import Events from '@/pages/Events';
-import Profile from '@/pages/Profile';
+// Lazy load all page components
+const Login = React.lazy(() => import('@/pages/Login'));
+const Register = React.lazy(() => import('@/pages/Register'));
+const ForgotPassword = React.lazy(() => import('@/pages/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'));
+const Home = React.lazy(() => import('@/pages/Home'));
+const Menu = React.lazy(() => import('@/pages/Menu'));
+const Cart = React.lazy(() => import('@/pages/Cart'));
+const Orders = React.lazy(() => import('@/pages/Orders'));
+const OrderTracking = React.lazy(() => import('@/pages/OrderTracking'));
+const Origins = React.lazy(() => import('@/pages/Origins'));
+const Stores = React.lazy(() => import('@/pages/Stores'));
+const Rewards = React.lazy(() => import('@/pages/Rewards'));
+const Events = React.lazy(() => import('@/pages/Events'));
+const Profile = React.lazy(() => import('@/pages/Profile'));
+const Dashboard = React.lazy(() => import('@/pages/admin/Dashboard'));
+const BranchesAdmin = React.lazy(() => import('@/pages/admin/BranchesAdmin'));
+const ProductsAdmin = React.lazy(() => import('@/pages/admin/ProductsAdmin'));
+const OrdersAdmin = React.lazy(() => import('@/pages/admin/OrdersAdmin'));
+const LoyaltyAdmin = React.lazy(() => import('@/pages/admin/LoyaltyAdmin'));
+const EventsAdmin = React.lazy(() => import('@/pages/admin/EventsAdmin'));
+const PromotionsAdmin = React.lazy(() => import('@/pages/admin/PromotionsAdmin'));
+const OriginsAdmin = React.lazy(() => import('@/pages/admin/OriginsAdmin'));
+const StockInventory = React.lazy(() => import('@/pages/admin/StockInventory'));
+const About = React.lazy(() => import('@/pages/About'));
+const Contact = React.lazy(() => import('@/pages/Contact'));
 
-import Dashboard from '@/pages/admin/Dashboard';
-import BranchesAdmin from '@/pages/admin/BranchesAdmin';
-import ProductsAdmin from '@/pages/admin/ProductsAdmin';
-import OrdersAdmin from '@/pages/admin/OrdersAdmin';
-import LoyaltyAdmin from '@/pages/admin/LoyaltyAdmin';
-import EventsAdmin from '@/pages/admin/EventsAdmin';
-import PromotionsAdmin from '@/pages/admin/PromotionsAdmin';
-import OriginsAdmin from '@/pages/admin/OriginsAdmin';
-import StockInventory from '@/pages/admin/StockInventory';
-import About from '@/pages/About';
-import Contact from '@/pages/Contact';
+const PageLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-background z-40">
+    <div className="w-8 h-8 border-4 border-muted border-t-secondary rounded-full animate-spin"></div>
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -77,42 +82,42 @@ const AuthenticatedApp = () => {
         style={{ width: '100%' }}
       >
       <Routes location={location}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/login" element={<Suspense fallback={<PageLoader />}><Login /></Suspense>} />
+        <Route path="/register" element={<Suspense fallback={<PageLoader />}><Register /></Suspense>} />
+        <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPassword /></Suspense>} />
+        <Route path="/reset-password" element={<Suspense fallback={<PageLoader />}><ResetPassword /></Suspense>} />
 
         {/* Public pages — no login required */}
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<Menu />} />
-          <Route path="/origins" element={<Origins />} />
-          <Route path="/stores" element={<Stores />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/" element={<Suspense fallback={<PageLoader />}><Home /></Suspense>} />
+          <Route path="/menu" element={<Suspense fallback={<PageLoader />}><Menu /></Suspense>} />
+          <Route path="/origins" element={<Suspense fallback={<PageLoader />}><Origins /></Suspense>} />
+          <Route path="/stores" element={<Suspense fallback={<PageLoader />}><Stores /></Suspense>} />
+          <Route path="/events" element={<Suspense fallback={<PageLoader />}><Events /></Suspense>} />
+          <Route path="/about" element={<Suspense fallback={<PageLoader />}><About /></Suspense>} />
+          <Route path="/contact" element={<Suspense fallback={<PageLoader />}><Contact /></Suspense>} />
         </Route>
 
         {/* Protected pages — login required */}
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route element={<AppLayout />}>
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/orders/track/:orderId" element={<OrderTracking />} />
-            <Route path="/rewards" element={<Rewards />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/cart" element={<Suspense fallback={<PageLoader />}><Cart /></Suspense>} />
+            <Route path="/orders" element={<Suspense fallback={<PageLoader />}><Orders /></Suspense>} />
+            <Route path="/orders/track/:orderId" element={<Suspense fallback={<PageLoader />}><OrderTracking /></Suspense>} />
+            <Route path="/rewards" element={<Suspense fallback={<PageLoader />}><Rewards /></Suspense>} />
+            <Route path="/profile" element={<Suspense fallback={<PageLoader />}><Profile /></Suspense>} />
           </Route>
 
           <Route element={<AdminLayout />}>
-            <Route path="/admin" element={<Dashboard />} />
-            <Route path="/admin/branches" element={<BranchesAdmin />} />
-            <Route path="/admin/products" element={<ProductsAdmin />} />
-            <Route path="/admin/orders" element={<OrdersAdmin />} />
-            <Route path="/admin/loyalty" element={<LoyaltyAdmin />} />
-            <Route path="/admin/events" element={<EventsAdmin />} />
-            <Route path="/admin/promotions" element={<PromotionsAdmin />} />
-            <Route path="/admin/origins" element={<OriginsAdmin />} />
-            <Route path="/admin/stock" element={<StockInventory />} />
+            <Route path="/admin" element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
+            <Route path="/admin/branches" element={<Suspense fallback={<PageLoader />}><BranchesAdmin /></Suspense>} />
+            <Route path="/admin/products" element={<Suspense fallback={<PageLoader />}><ProductsAdmin /></Suspense>} />
+            <Route path="/admin/orders" element={<Suspense fallback={<PageLoader />}><OrdersAdmin /></Suspense>} />
+            <Route path="/admin/loyalty" element={<Suspense fallback={<PageLoader />}><LoyaltyAdmin /></Suspense>} />
+            <Route path="/admin/events" element={<Suspense fallback={<PageLoader />}><EventsAdmin /></Suspense>} />
+            <Route path="/admin/promotions" element={<Suspense fallback={<PageLoader />}><PromotionsAdmin /></Suspense>} />
+            <Route path="/admin/origins" element={<Suspense fallback={<PageLoader />}><OriginsAdmin /></Suspense>} />
+            <Route path="/admin/stock" element={<Suspense fallback={<PageLoader />}><StockInventory /></Suspense>} />
           </Route>
         </Route>
 

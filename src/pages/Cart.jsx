@@ -12,7 +12,7 @@ import { Plus, Minus, Trash2, ShoppingBag, MapPin, CreditCard, ArrowLeft, Store,
 import { useCart } from '@/lib/CartContext';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 const PAYMENT_METHODS = [
@@ -43,11 +43,28 @@ export default function Cart() {
   const isDelivery = deliveryType === 'delivery';
   const orderTotal = isDelivery ? total + DELIVERY_FEE : total;
 
+  const orderMutation = useMutation({
+    mutationFn: (orderData) => base44.entities.Order.create(orderData),
+    onMutate: async () => {
+      setSubmitting(true);
+    },
+    onSuccess: (created) => {
+      clearCart();
+      toast.success('Order placed successfully! 🎉');
+      navigate(`/orders/track/${created.id}`);
+      setSubmitting(false);
+    },
+    onError: () => {
+      toast.error('Failed to place order');
+      setSubmitting(false);
+    },
+  });
+
   const handleOrder = async () => {
     if (!selectedBranch) { toast.error('Please select a branch'); return; }
     if (isDelivery && !deliveryAddress.trim()) { toast.error('Please enter a delivery address'); return; }
     if (items.length === 0) return;
-    setSubmitting(true);
+    
     const branch = branches.find(b => b.id === selectedBranch);
     const orderData = {
       order_number: `MIL-${Date.now().toString(36).toUpperCase()}`,
@@ -75,11 +92,7 @@ export default function Cart() {
       notes: notes || undefined,
       loyalty_points_earned: Math.floor(orderTotal / 10),
     };
-    const created = await base44.entities.Order.create(orderData);
-    clearCart();
-    toast.success('Order placed successfully! 🎉');
-    navigate(`/orders/track/${created.id}`);
-    setSubmitting(false);
+    orderMutation.mutate(orderData);
   };
 
   if (items.length === 0) {

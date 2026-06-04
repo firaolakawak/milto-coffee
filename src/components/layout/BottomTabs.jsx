@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, UtensilsCrossed, ShoppingBag, User } from 'lucide-react';
+import { useTabsContext } from '@/lib/TabsContext';
 
 const TABS = [
   { label: 'Home',   path: '/',        icon: Home },
@@ -11,6 +12,19 @@ const TABS = [
 
 export default function BottomTabs() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { activeTab, setActiveTab, resetTabState } = useTabsContext();
+
+  const handleTabClick = (path) => {
+    if (activeTab === path) {
+      // Reset to root if clicking active tab
+      resetTabState(path);
+      navigate(path);
+    } else {
+      setActiveTab(path);
+      navigate(path);
+    }
+  };
 
   return (
     <nav
@@ -21,16 +35,16 @@ export default function BottomTabs() {
         {TABS.map(({ label, path, icon: Icon }) => {
           const active = pathname === path || (path !== '/' && pathname.startsWith(path));
           return (
-            <Link
+            <button
               key={path}
-              to={path}
+              onClick={() => handleTabClick(path)}
               className={`flex flex-col items-center gap-0.5 px-4 py-2 transition-colors ${
                 active ? 'text-secondary' : 'text-muted-foreground'
               }`}
             >
               <Icon className={`h-5 w-5 ${active ? 'stroke-[2.5]' : 'stroke-[1.5]'}`} />
               <span className={`text-[10px] font-medium ${active ? 'text-secondary' : ''}`}>{label}</span>
-            </Link>
+            </button>
           );
         })}
       </div>

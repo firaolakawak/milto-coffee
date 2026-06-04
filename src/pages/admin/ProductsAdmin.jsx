@@ -31,11 +31,39 @@ export default function ProductsAdmin() {
 
   const saveMutation = useMutation({
     mutationFn: (data) => editing ? base44.entities.Product.update(editing.id, data) : base44.entities.Product.create(data),
+    onMutate: async (data) => {
+      await qc.cancelQueries({ queryKey: ['admin-products'] });
+      const prev = qc.getQueryData(['admin-products']);
+      if (editing) {
+        qc.setQueryData(['admin-products'], (old) =>
+          old.map(p => p.id === editing.id ? { ...p, ...data } : p)
+        );
+      } else {
+        qc.setQueryData(['admin-products'], (old) =>
+          [{ ...emptyProduct, ...data, id: Date.now().toString() }, ...old]
+        );
+      }
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) qc.setQueryData(['admin-products'], context.prev);
+      toast.error('Failed to save product');
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-products'] }); setOpen(false); setEditing(null); setForm(emptyProduct); toast.success('Product saved!'); },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Product.delete(id),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: ['admin-products'] });
+      const prev = qc.getQueryData(['admin-products']);
+      qc.setQueryData(['admin-products'], (old) => old.filter(p => p.id !== id));
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) qc.setQueryData(['admin-products'], context.prev);
+      toast.error('Failed to delete product');
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-products'] }); toast.success('Product deleted'); },
   });
 
@@ -139,7 +167,14 @@ export default function ProductsAdmin() {
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-1">
                 <Badge variant="secondary" className="text-xs capitalize">{p.category?.replace('_', ' ')}</Badge>
-                <Switch checked={p.is_available} onCheckedChange={async (v) => { await base44.entities.Product.update(p.id, { is_available: v }); qc.invalidateQueries({ queryKey: ['admin-products'] }); }} />
+                <Switch checked={p.is_available} onCheckedChange={(v) => {
+                 qc.setQueryData(['admin-products'], (old) =>
+                   old.map(prod => prod.id === p.id ? { ...prod, is_available: v } : prod)
+                 );
+                 base44.entities.Product.update(p.id, { is_available: v }).then(() => {
+                   qc.invalidateQueries({ queryKey: ['admin-products'] });
+                 });
+               }} />
               </div>
               <h3 className="font-semibold text-sm mt-2">{p.name}</h3>
               <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>

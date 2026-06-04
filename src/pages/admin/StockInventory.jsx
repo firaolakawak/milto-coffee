@@ -31,6 +31,17 @@ export default function StockInventory() {
 
   const updateStock = useMutation({
     mutationFn: ({ id, stock_level }) => base44.entities.Product.update(id, { stock_level }),
+    onMutate: async ({ id, stock_level }) => {
+      await qc.cancelQueries({ queryKey: ['admin-products'] });
+      const prev = qc.getQueryData(['admin-products']);
+      qc.setQueryData(['admin-products'], (old) =>
+        old.map(p => p.id === id ? { ...p, stock_level } : p)
+      );
+      return { prev };
+    },
+    onError: (_, __, context) => {
+      if (context?.prev) qc.setQueryData(['admin-products'], context.prev);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-products'] }),
   });
 

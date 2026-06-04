@@ -26,7 +26,7 @@ export default function AdminLayout() {
           <Link to="/" className="flex items-center gap-2">
             <img
               src="https://media.base44.com/images/public/6a2091b55874dccfc09ef00c/2307f935d_milto.png" alt="Milto Coffee"
-              className="h-7 w-auto"
+              className="h-10 w-auto"
             />
             <span className="font-display font-bold text-lg">Milto Admin</span>
           </Link>

@@ -148,6 +148,10 @@ export default function ProductsAdmin() {
             <div><Label className="text-xs">Description</Label><Textarea value={form.description} onChange={e => set('description', e.target.value)} rows={2} /></div>
             <div><Label className="text-xs">Description (Amharic)</Label><Textarea value={form.description_am} onChange={e => set('description_am', e.target.value)} rows={2} /></div>
             <div><Label className="text-xs">Image URL</Label><Input value={form.image_url} onChange={e => set('image_url', e.target.value)} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label className="text-xs">Stock Level</Label><Input type="number" value={form.stock_level ?? 100} onChange={e => set('stock_level', Number(e.target.value))} /></div>
+              <div><Label className="text-xs">Low Stock Threshold</Label><Input type="number" value={form.stock_threshold ?? 10} onChange={e => set('stock_threshold', Number(e.target.value))} /></div>
+            </div>
             <div className="flex items-center justify-between">
               <Label className="text-xs">Featured</Label><Switch checked={form.is_featured} onCheckedChange={v => set('is_featured', v)} />
             </div>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Menu, ShoppingCart, Coffee, User, X } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { useAuth } from '@/lib/AuthContext';
+import NotificationBell from '@/components/layout/NotificationBell';
 
 const navLinks = [
   { label: 'Menu', path: '/menu' },
@@ -44,6 +45,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <NotificationBell user={user} />
           <Link to="/cart" className="relative">
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />

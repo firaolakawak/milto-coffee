@@ -44,6 +44,16 @@
       "type": "boolean",
       "default": false
     },
+    "stock_level": {
+      "type": "number",
+      "default": 100,
+      "description": "Current stock quantity"
+    },
+    "stock_threshold": {
+      "type": "number",
+      "default": 10,
+      "description": "Alert when stock falls below this"
+    },
     "sizes": {
       "type": "array",
       "items": {

@@ -3,8 +3,10 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, ShoppingBag, Users, Store, TrendingUp, Clock, ChefHat, Coffee as CoffeeIcon } from 'lucide-react';
+import { DollarSign, ShoppingBag, Store, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import StockAlerts from '@/components/admin/StockAlerts';
+import SalesTrendsChart from '@/components/admin/SalesTrendsChart';
 
 export default function Dashboard() {
   const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: () => base44.entities.Order.list('-created_date', 100) });
@@ -40,6 +42,9 @@ export default function Dashboard() {
         <h1 className="font-display text-2xl font-bold text-primary">Dashboard</h1>
         <p className="text-sm text-muted-foreground">Overview of your Milto Coffee operations</p>
       </div>
+
+      <StockAlerts />
+      <SalesTrendsChart orders={orders} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map(stat => (

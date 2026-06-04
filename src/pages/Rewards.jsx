@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Award, Star, Crown, Gem, Gift, Users, TrendingUp, Bell, X } from 'lucide-react';
+import { Award, Star, Crown, Gem, Gift, Users, TrendingUp, Bell, X, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const tierConfig = {
@@ -25,6 +25,8 @@ const perks = [
 export default function Rewards() {
   const { user } = useAuth();
   const [dismissedNotifications, setDismissedNotifications] = useState(new Set());
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [referralCount, setReferralCount] = useState(0);
   
   const { data: accounts = [] } = useQuery({
     queryKey: ['loyalty-account'],
@@ -38,15 +40,25 @@ export default function Rewards() {
     enabled: !!user,
   });
 
-  // Auto-refresh notifications when loyalty account changes
+  // Count referrals and auto-refresh
   useEffect(() => {
+    if (account.referral_code) {
+      const countReferrals = async () => {
+        const referred = await base44.entities.LoyaltyAccount.filter({
+          referred_by: account.referral_code,
+        });
+        setReferralCount(referred.length);
+      };
+      countReferrals();
+    }
+
     const unsubscribe = base44.entities.LoyaltyAccount.subscribe((event) => {
-      if (event.type === 'update') {
-        // Trigger notification refresh
+      if (event.type === 'create' || event.type === 'update') {
+        // Refresh referral count
       }
     });
     return unsubscribe;
-  }, []);
+  }, [account.referral_code]);
 
   const account = accounts[0] || { points: 0, total_points_earned: 0, tier: 'bronze', total_orders: 0, badges: [] };
   const tier = tierConfig[account.tier] || tierConfig.bronze;
@@ -59,6 +71,14 @@ export default function Rewards() {
 
   const dismissNotification = (id) => {
     setDismissedNotifications(prev => new Set(prev).add(id));
+  };
+
+  const copyReferralCode = () => {
+    if (account.referral_code) {
+      navigator.clipboard.writeText(account.referral_code);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
   };
 
   return (
@@ -93,6 +113,46 @@ export default function Rewards() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Referral Section */}
+      {account.referral_code && (
+        <Card className="border-0 shadow-md bg-gradient-to-br from-secondary/20 to-secondary/10 mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-5 w-5 text-secondary" />
+              <h2 className="font-display text-lg font-bold text-primary">Share & Earn</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Invite friends with your referral code and earn 100 bonus points for each successful sign-up!</p>
+            
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="bg-background rounded-lg p-4 border border-border">
+                <p className="text-xs text-muted-foreground mb-2">Your Referral Code</p>
+                <div className="flex items-center gap-2">
+                  <code className="font-mono font-bold text-primary text-lg">{account.referral_code}</code>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={copyReferralCode}
+                  >
+                    {copiedCode ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="bg-background rounded-lg p-4 border border-border">
+                <p className="text-xs text-muted-foreground mb-2">Successful Referrals</p>
+                <p className="text-2xl font-bold text-secondary">{referralCount}</p>
+                <p className="text-xs text-muted-foreground mt-1">+{referralCount * 100} bonus points</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <Card className="border-0 shadow-lg bg-gradient-to-br from-primary to-primary/90 text-primary-foreground mb-8 overflow-hidden">

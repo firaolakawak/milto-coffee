@@ -26,7 +26,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <Coffee className="h-7 w-7 text-secondary" />
+          <img src="https://media.base44.com/images/public/6a2091b55874dccfc09ef00c/2307f935d_milto.png" alt="Milto Coffee" className="h-10 w-10 rounded-full object-cover" />
           <span className="font-display text-xl font-bold text-primary">Milto Coffee</span>
         </Link>
 

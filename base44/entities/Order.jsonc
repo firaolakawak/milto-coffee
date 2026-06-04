@@ -62,10 +62,26 @@
         "received",
         "preparing",
         "ready",
+        "out_for_delivery",
         "completed",
         "cancelled"
       ],
       "default": "received"
+    },
+    "delivery_type": {
+      "type": "string",
+      "enum": [
+        "pickup",
+        "delivery"
+      ],
+      "default": "pickup"
+    },
+    "delivery_address": {
+      "type": "string"
+    },
+    "delivery_fee": {
+      "type": "number",
+      "default": 0
     },
     "payment_method": {
       "type": "string",

@@ -82,7 +82,12 @@ export default function OrdersAdmin() {
                       <span className="font-bold text-sm">#{order.order_number}</span>
                       <Badge className={`${status.color} border-0 gap-1 text-xs`}><StatusIcon className="h-3 w-3" /> {status.label}</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">{order.customer_name} · {order.branch_name} · {format(new Date(order.created_date), 'MMM d, h:mm a')}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {order.customer_name} · {order.branch_name} · {format(new Date(order.created_date), 'MMM d, h:mm a')}
+                      {order.delivery_type === 'delivery'
+                        ? <span className="ml-1 text-purple-600">🛵 Delivery{order.delivery_address ? `: ${order.delivery_address}` : ''}</span>
+                        : <span className="ml-1">🏪 Pickup</span>}
+                    </p>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {order.items?.map((item, i) => (
                         <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded-full">{item.quantity}x {item.product_name}</span>
@@ -91,11 +96,14 @@ export default function OrdersAdmin() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-bold text-secondary">{order.total} ETB</span>
-                    {status.next && (
-                      <Button size="sm" className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90" onClick={() => updateStatus.mutate({ id: order.id, status: status.next })}>
-                        → {statusConfig[status.next]?.label}
-                      </Button>
-                    )}
+                    {(() => {
+                      const nextStatus = order.delivery_type === 'delivery' ? status.nextDelivery : status.nextPickup;
+                      return nextStatus ? (
+                        <Button size="sm" className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90" onClick={() => updateStatus.mutate({ id: order.id, status: nextStatus })}>
+                          → {statusConfig[nextStatus]?.label}
+                        </Button>
+                      ) : null;
+                    })()}
                     {order.status !== 'cancelled' && order.status !== 'completed' && (
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus.mutate({ id: order.id, status: 'cancelled' })}>
                         <X className="h-3 w-3" />

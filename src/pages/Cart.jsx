@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Plus, Minus, Trash2, ShoppingBag, MapPin, CreditCard, ArrowLeft } from 'lucide-react';
+import { Plus, Minus, Trash2, ShoppingBag, MapPin, CreditCard, ArrowLeft, Store, Truck } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -29,16 +29,23 @@ export default function Cart() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('telebirr');
+  const [deliveryType, setDeliveryType] = useState('pickup');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const DELIVERY_FEE = 50;
 
   const { data: branches = [] } = useQuery({
     queryKey: ['branches-cart'],
     queryFn: () => base44.entities.Branch.filter({ is_active: true }),
   });
 
+  const isDelivery = deliveryType === 'delivery';
+  const orderTotal = isDelivery ? total + DELIVERY_FEE : total;
+
   const handleOrder = async () => {
-    if (!selectedBranch) { toast.error('Please select a pickup branch'); return; }
+    if (!selectedBranch) { toast.error('Please select a branch'); return; }
+    if (isDelivery && !deliveryAddress.trim()) { toast.error('Please enter a delivery address'); return; }
     if (items.length === 0) return;
     setSubmitting(true);
     const branch = branches.find(b => b.id === selectedBranch);
@@ -58,17 +65,20 @@ export default function Cart() {
         total_price: i.unitPrice * i.quantity,
       })),
       subtotal,
-      total,
+      total: orderTotal,
+      delivery_type: deliveryType,
+      delivery_address: isDelivery ? deliveryAddress : undefined,
+      delivery_fee: isDelivery ? DELIVERY_FEE : 0,
       status: 'received',
       payment_method: paymentMethod,
       promo_code: promoCode || undefined,
       notes: notes || undefined,
-      loyalty_points_earned: Math.floor(total / 10),
+      loyalty_points_earned: Math.floor(orderTotal / 10),
     };
-    await base44.entities.Order.create(orderData);
+    const created = await base44.entities.Order.create(orderData);
     clearCart();
     toast.success('Order placed successfully! 🎉');
-    navigate('/orders');
+    navigate(`/orders/track/${created.id}`);
     setSubmitting(false);
   };
 
@@ -121,15 +131,46 @@ export default function Cart() {
           ))}
         </div>
         <div className="space-y-4">
+          {/* Delivery Type */}
           <Card className="border-0 shadow-sm">
-            <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><MapPin className="h-4 w-4" /> Pickup Branch</CardTitle></CardHeader>
-            <CardContent className="pt-0">
+            <CardHeader className="pb-3"><CardTitle className="text-sm">Order Type</CardTitle></CardHeader>
+            <CardContent className="pt-0 grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setDeliveryType('pickup')}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-medium transition-colors
+                  ${deliveryType === 'pickup' ? 'border-secondary bg-secondary/5 text-primary' : 'border-border text-muted-foreground'}`}
+              >
+                <Store className="h-5 w-5" />
+                Pickup
+              </button>
+              <button
+                onClick={() => setDeliveryType('delivery')}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-sm font-medium transition-colors
+                  ${deliveryType === 'delivery' ? 'border-secondary bg-secondary/5 text-primary' : 'border-border text-muted-foreground'}`}
+              >
+                <Truck className="h-5 w-5" />
+                Delivery (+{DELIVERY_FEE} ETB)
+              </button>
+            </CardContent>
+          </Card>
+
+          {/* Branch */}
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><MapPin className="h-4 w-4" /> {isDelivery ? 'Nearest Branch' : 'Pickup Branch'}</CardTitle></CardHeader>
+            <CardContent className="pt-0 space-y-3">
               <Select value={selectedBranch || ''} onValueChange={setSelectedBranch}>
                 <SelectTrigger><SelectValue placeholder="Select branch" /></SelectTrigger>
                 <SelectContent>
                   {branches.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {isDelivery && (
+                <Input
+                  placeholder="Enter your delivery address..."
+                  value={deliveryAddress}
+                  onChange={e => setDeliveryAddress(e.target.value)}
+                />
+              )}
             </CardContent>
           </Card>
           <Card className="border-0 shadow-sm">
@@ -154,8 +195,9 @@ export default function Cart() {
           <Card className="border-0 shadow-md bg-primary text-primary-foreground">
             <CardContent className="p-4 space-y-3">
               <div className="flex justify-between text-sm"><span className="opacity-80">Subtotal</span><span>{subtotal} ETB</span></div>
+              {isDelivery && <div className="flex justify-between text-sm"><span className="opacity-80">Delivery Fee</span><span>{DELIVERY_FEE} ETB</span></div>}
               <Separator className="bg-primary-foreground/20" />
-              <div className="flex justify-between font-bold text-lg"><span>Total</span><span>{total} ETB</span></div>
+              <div className="flex justify-between font-bold text-lg"><span>Total</span><span>{orderTotal} ETB</span></div>
               <Button onClick={handleOrder} disabled={submitting} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full mt-2" size="lg">
                 {submitting ? 'Placing Order...' : 'Place Order'}
               </Button>

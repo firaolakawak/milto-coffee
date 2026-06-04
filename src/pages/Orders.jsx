@@ -4,17 +4,22 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Package, Clock, ChefHat, Check, Coffee } from 'lucide-react';
+import { Package, Clock, ChefHat, Check, Coffee, Truck, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
 const statusConfig = {
-  received: { label: 'Received', icon: Clock, color: 'bg-blue-100 text-blue-700' },
-  preparing: { label: 'Preparing', icon: ChefHat, color: 'bg-amber-100 text-amber-700' },
-  ready: { label: 'Ready for Pickup', icon: Coffee, color: 'bg-green-100 text-green-700' },
-  completed: { label: 'Completed', icon: Check, color: 'bg-slate-100 text-slate-600' },
-  cancelled: { label: 'Cancelled', icon: Package, color: 'bg-red-100 text-red-600' },
+  received:         { label: 'Received',          icon: Clock,    color: 'bg-blue-100 text-blue-700' },
+  preparing:        { label: 'Preparing',          icon: ChefHat,  color: 'bg-amber-100 text-amber-700' },
+  ready:            { label: 'Ready for Pickup',   icon: Coffee,   color: 'bg-green-100 text-green-700' },
+  out_for_delivery: { label: 'Out for Delivery',   icon: Truck,    color: 'bg-purple-100 text-purple-700' },
+  completed:        { label: 'Completed',          icon: Check,    color: 'bg-slate-100 text-slate-600' },
+  cancelled:        { label: 'Cancelled',          icon: Package,  color: 'bg-red-100 text-red-600' },
 };
+
+const ACTIVE = ['received', 'preparing', 'ready', 'out_for_delivery'];
 
 export default function Orders() {
   const { user } = useAuth();
@@ -60,9 +65,16 @@ export default function Orders() {
                     ))}
                   </div>
                   <div className="flex justify-between items-center mt-3 pt-3 border-t">
-                    <span className="text-xs text-muted-foreground capitalize">{order.payment_method?.replace('_', ' ')}</span>
+                    <span className="text-xs text-muted-foreground capitalize">{order.payment_method?.replace('_', ' ')} · {order.delivery_type === 'delivery' ? '🛵 Delivery' : '🏪 Pickup'}</span>
                     <span className="font-bold text-secondary">{order.total} ETB</span>
                   </div>
+                  {ACTIVE.includes(order.status) && (
+                    <Link to={`/orders/track/${order.id}`} className="block mt-3">
+                      <Button size="sm" className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 gap-1.5 rounded-full">
+                        <ExternalLink className="h-3.5 w-3.5" /> Track Order
+                      </Button>
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
             );

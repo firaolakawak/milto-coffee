@@ -21,6 +21,7 @@ import Home from '@/pages/Home';
 import Menu from '@/pages/Menu';
 import Cart from '@/pages/Cart';
 import Orders from '@/pages/Orders';
+import OrderTracking from '@/pages/OrderTracking';
 import Origins from '@/pages/Origins';
 import Stores from '@/pages/Stores';
 import Rewards from '@/pages/Rewards';
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
             <Route path="/menu" element={<Menu />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/track/:orderId" element={<OrderTracking />} />
             <Route path="/origins" element={<Origins />} />
             <Route path="/stores" element={<Stores />} />
             <Route path="/rewards" element={<Rewards />} />

@@ -20,8 +20,8 @@ export default function AdminLayout() {
   const { pathname } = useLocation();
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <aside className="hidden lg:flex w-64 bg-sidebar text-sidebar-foreground flex-col border-r border-sidebar-border">
+    <div className="h-screen bg-background flex overflow-hidden">
+      <aside className="hidden lg:flex w-64 bg-sidebar text-sidebar-foreground flex-col border-r border-sidebar-border overflow-y-auto">
         <div className="p-5 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-2">
             <Coffee className="h-6 w-6 text-sidebar-primary" />

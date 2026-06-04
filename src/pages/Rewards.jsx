@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Award, Star, Crown, Gem, Gift, Users, TrendingUp } from 'lucide-react';
+import { Award, Star, Crown, Gem, Gift, Users, TrendingUp, Bell, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const tierConfig = {
   bronze: { icon: Award, color: 'text-amber-700', bg: 'bg-amber-100', next: 'silver', pointsNeeded: 500 },
@@ -23,16 +24,42 @@ const perks = [
 
 export default function Rewards() {
   const { user } = useAuth();
+  const [dismissedNotifications, setDismissedNotifications] = useState(new Set());
+  
   const { data: accounts = [] } = useQuery({
     queryKey: ['loyalty-account'],
     queryFn: () => base44.entities.LoyaltyAccount.filter({ created_by_id: user?.id }),
     enabled: !!user,
   });
 
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['loyalty-notifications'],
+    queryFn: () => base44.entities.Notification.filter({ user_id: user?.id }, '-created_date', 10),
+    enabled: !!user,
+  });
+
+  // Auto-refresh notifications when loyalty account changes
+  useEffect(() => {
+    const unsubscribe = base44.entities.LoyaltyAccount.subscribe((event) => {
+      if (event.type === 'update') {
+        // Trigger notification refresh
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   const account = accounts[0] || { points: 0, total_points_earned: 0, tier: 'bronze', total_orders: 0, badges: [] };
   const tier = tierConfig[account.tier] || tierConfig.bronze;
   const TierIcon = tier.icon;
   const progress = tier.pointsNeeded ? (account.total_points_earned / tier.pointsNeeded) * 100 : 100;
+
+  const recentNotifications = notifications
+    .filter(n => ['general'].includes(n.type) && !dismissedNotifications.has(n.id))
+    .slice(0, 3);
+
+  const dismissNotification = (id) => {
+    setDismissedNotifications(prev => new Set(prev).add(id));
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -40,6 +67,33 @@ export default function Rewards() {
         <h1 className="font-display text-3xl font-bold text-primary">Rewards</h1>
         <p className="text-muted-foreground mt-1">Earn Coffee Credits with every purchase</p>
       </div>
+
+      {/* Recent Notifications */}
+      {recentNotifications.length > 0 && (
+        <div className="space-y-2 mb-6">
+          {recentNotifications.map(notif => (
+            <Card key={notif.id} className="border-0 shadow-sm bg-secondary/10 border-l-4 border-secondary">
+              <CardContent className="p-4 flex items-start justify-between">
+                <div className="flex items-start gap-3 flex-1">
+                  <Bell className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-sm text-primary">{notif.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0"
+                  onClick={() => dismissNotification(notif.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card className="border-0 shadow-lg bg-gradient-to-br from-primary to-primary/90 text-primary-foreground mb-8 overflow-hidden">
         <CardContent className="p-6 md:p-8">

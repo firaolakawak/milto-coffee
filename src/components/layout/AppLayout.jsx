@@ -24,7 +24,7 @@ export default function AppLayout() {
           <div>
             <h4 className="font-semibold mb-3 text-sm">Contact</h4>
             <div className="flex flex-col gap-1 text-sm opacity-80">
-              <span>info@miltocoffee.com</span><span>+251 911 123 456</span>
+              <span>info@miltocoffee.com</span><span>+251911708622</span>
             </div>
           </div>
           <div>

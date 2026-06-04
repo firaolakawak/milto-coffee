@@ -11,7 +11,19 @@ Deno.serve(async (req) => {
 
     let notification = null;
 
-    if (order?.status === 'ready') {
+    if (order?.status === 'received') {
+      notification = {
+        title: '✅ Order Confirmed!',
+        message: `Order #${order.order_number || order.id?.slice(-6)} has been received and is being prepared.`,
+        type: 'order_ready',
+      };
+    } else if (order?.status === 'preparing') {
+      notification = {
+        title: '👨‍🍳 Preparing Your Order',
+        message: `Order #${order.order_number || order.id?.slice(-6)} is being prepared at ${order.branch_name || 'the store'}.`,
+        type: 'order_ready',
+      };
+    } else if (order?.status === 'ready') {
       notification = {
         title: '☕ Your order is ready!',
         message: `Order #${order.order_number || order.id?.slice(-6)} is ready for pickup at ${order.branch_name || 'the store'}. Please collect it now.`,
@@ -21,6 +33,18 @@ Deno.serve(async (req) => {
       notification = {
         title: '🛵 Your order is on the way!',
         message: `Order #${order.order_number || order.id?.slice(-6)} is out for delivery from ${order.branch_name || 'the store'}. Get ready!`,
+        type: 'order_ready',
+      };
+    } else if (order?.status === 'completed') {
+      notification = {
+        title: '🎉 Order Delivered!',
+        message: `Thank you for your order! We hope you enjoyed it. Rate us or order again anytime.`,
+        type: 'order_ready',
+      };
+    } else if (order?.status === 'cancelled') {
+      notification = {
+        title: '❌ Order Cancelled',
+        message: `Order #${order.order_number || order.id?.slice(-6)} has been cancelled. Contact support if you have questions.`,
         type: 'order_ready',
       };
     }

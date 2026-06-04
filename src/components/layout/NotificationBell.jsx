@@ -1,9 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Bell } from 'lucide-react';
 import { format } from 'date-fns';
+
+const playNotificationSound = () => {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  } catch (err) {
+    console.log('Sound notification unavailable');
+  }
+};
 
 export default function NotificationBell({ user }) {
   const [open, setOpen] = useState(false);
@@ -13,10 +35,16 @@ export default function NotificationBell({ user }) {
     queryKey: ['notifications', user?.id],
     queryFn: () => base44.entities.Notification.filter({ user_id: user?.id }, '-created_date', 20),
     enabled: !!user?.id,
-    refetchInterval: 30000,
+    refetchInterval: 5000,
   });
 
   const unread = notifications.filter(n => !n.is_read);
+
+  useEffect(() => {
+    if (unread.length > 0) {
+      playNotificationSound();
+    }
+  }, [unread.length]);
 
   const markRead = useMutation({
     mutationFn: (id) => base44.entities.Notification.update(id, { is_read: true }),

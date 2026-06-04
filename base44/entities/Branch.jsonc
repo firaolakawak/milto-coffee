@@ -19,6 +19,11 @@
     "phone": {
       "type": "string"
     },
+    "description": {
+      "type": "string",
+      "description": "A short description of this branch (up to 1000 characters)",
+      "maxLength": 1000
+    },
     "latitude": {
       "type": "number"
     },

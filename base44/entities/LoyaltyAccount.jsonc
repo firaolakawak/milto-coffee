@@ -5,6 +5,11 @@
     "user_name": {
       "type": "string"
     },
+    "description": {
+      "type": "string",
+      "description": "Optional notes or description for this loyalty account (up to 1000 characters)",
+      "maxLength": 1000
+    },
     "points": {
       "type": "number",
       "default": 0

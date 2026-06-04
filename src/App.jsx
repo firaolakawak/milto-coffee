@@ -37,6 +37,8 @@ import EventsAdmin from '@/pages/admin/EventsAdmin';
 import PromotionsAdmin from '@/pages/admin/PromotionsAdmin';
 import OriginsAdmin from '@/pages/admin/OriginsAdmin';
 import StockInventory from '@/pages/admin/StockInventory';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -81,6 +83,8 @@ const AuthenticatedApp = () => {
             <Route path="/rewards" element={<Rewards />} />
             <Route path="/events" element={<Events />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
           </Route>
 
           <Route element={<AdminLayout />}>

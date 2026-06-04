@@ -14,6 +14,7 @@ const navLinks = [
   { label: 'Stores', path: '/stores' },
   { label: 'Rewards', path: '/rewards' },
   { label: 'Events', path: '/events' },
+  { label: 'About', path: '/about' },
 ];
 
 export default function Navbar() {

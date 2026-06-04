@@ -18,19 +18,26 @@ export default function AppLayout() {
           <div>
             <h4 className="font-semibold mb-3 text-sm">Quick Links</h4>
             <div className="flex flex-col gap-1 text-sm opacity-80">
-              <span>Menu</span><span>Locations</span><span>Rewards</span>
+              <a href="/menu" className="hover:opacity-100 transition-opacity">Menu</a>
+              <a href="/stores" className="hover:opacity-100 transition-opacity">Locations</a>
+              <a href="/rewards" className="hover:opacity-100 transition-opacity">Rewards</a>
+              <a href="/about" className="hover:opacity-100 transition-opacity">About Us</a>
+              <a href="/contact" className="hover:opacity-100 transition-opacity">Contact</a>
             </div>
           </div>
           <div>
             <h4 className="font-semibold mb-3 text-sm">Contact</h4>
             <div className="flex flex-col gap-1 text-sm opacity-80">
-              <span>info@miltocoffe.com</span><span>+251911708622</span>
+              <a href="mailto:info@miltocoffe.com" className="hover:opacity-100 transition-opacity">info@miltocoffe.com</a>
+              <a href="tel:+251911708622" className="hover:opacity-100 transition-opacity">+251911708622</a>
             </div>
           </div>
           <div>
             <h4 className="font-semibold mb-3 text-sm">Follow Us</h4>
             <div className="flex flex-col gap-1 text-sm opacity-80">
-              <span>Instagram</span><span>Facebook</span><span>TikTok</span>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">Instagram</a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">Facebook</a>
+              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">TikTok</a>
             </div>
           </div>
         </div>

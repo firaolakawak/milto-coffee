@@ -8,6 +8,11 @@
     "region_am": {
       "type": "string"
     },
+    "description": {
+      "type": "string",
+      "description": "A brief overview of this coffee origin (up to 1000 characters)",
+      "maxLength": 1000
+    },
     "story": {
       "type": "string"
     },

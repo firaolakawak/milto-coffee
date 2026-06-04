@@ -93,6 +93,15 @@ export default function Cart() {
     );
   }
 
+  // "Add More" button rendered inside the cart items section
+  const AddMoreButton = () => (
+    <Link to="/menu">
+      <Button variant="outline" className="w-full rounded-full border-dashed border-secondary text-secondary gap-2">
+        <Plus className="h-4 w-4" /> Add More Items
+      </Button>
+    </Link>
+  );
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-8">
@@ -101,9 +110,10 @@ export default function Cart() {
       </div>
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
+          <AddMoreButton />
           {items.map(item => (
             <Card key={item.key} className="border-0 shadow-sm">
-              <CardContent className="p-4 flex items-center gap-4">
+              <CardContent className="p-4 flex items-start gap-4">
                 <div className="w-16 h-16 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
                   {item.product.image_url ? (
                     <img src={item.product.image_url} alt="" className="w-full h-full object-cover rounded-xl" />

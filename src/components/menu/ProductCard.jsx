@@ -16,12 +16,14 @@ const SIZES = [
 
 const MILK_OPTIONS = ['Whole', 'Skim', 'Oat', 'Almond', 'None'];
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
+const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 
 export default function ProductCard({ product }) {
   const [open, setOpen] = useState(false);
   const [size, setSize] = useState('Medium');
   const [milk, setMilk] = useState('Whole');
   const [sugar, setSugar] = useState('Regular');
+  const [roast, setRoast] = useState('Regular');
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
 
@@ -30,7 +32,7 @@ export default function ProductCard({ product }) {
   const unitPrice = product.price + (sizeData?.price_modifier || 0);
 
   const handleAdd = () => {
-    const customizations = isBeverage ? { milk, sugar } : {};
+    const customizations = isBeverage ? { milk, sugar, roast } : {};
     addItem({ ...product, sizes: SIZES }, quantity, size, customizations);
     toast.success(`Added ${product.name} to cart`);
     setOpen(false);
@@ -108,6 +110,20 @@ export default function ProductCard({ product }) {
                         className={`py-1.5 px-3 rounded-full text-sm border transition-all ${sugar === s ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
                       >
                         {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Roast</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {ROAST_OPTIONS.map(r => (
+                      <button
+                        key={r}
+                        onClick={() => setRoast(r)}
+                        className={`py-1.5 px-3 rounded-full text-sm border transition-all ${roast === r ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
+                      >
+                        {r}
                       </button>
                     ))}
                   </div>

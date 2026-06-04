@@ -5,8 +5,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Award, Star, Crown, Gem, Gift, Users, TrendingUp, Bell, X, Copy, Check } from 'lucide-react';
+import { Award, Star, Crown, Gem, Gift, Users, TrendingUp, Bell, X, Copy, Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const tierConfig = {
   bronze: { icon: Award, color: 'text-amber-700', bg: 'bg-amber-100', next: 'silver', pointsNeeded: 500 },
@@ -20,6 +21,35 @@ const perks = [
   { tier: 'Silver', items: ['Free size upgrades', 'Early access to new drinks', 'Double points weekends'] },
   { tier: 'Gold', items: ['Priority ordering', 'Free pastry monthly', 'Triple points events'] },
   { tier: 'Platinum', items: ['Exclusive coffee releases', 'Roasting workshop invites', 'Personal barista recommendations'] },
+];
+
+const redemptionRules = [
+  { title: 'Point Conversion', description: '1 Coffee Credit = AED 1 off your order' },
+  { title: 'Minimum Redemption', description: 'Minimum 50 points required for redemption' },
+  { title: 'No Expiration', description: 'Your points never expire as long as your account is active' },
+  { title: 'Redemption Method', description: 'Select "Redeem Points" at checkout and apply to your order' },
+  { title: 'Multiple Usage', description: 'Use points for drinks, food, pastries, and merchandise' },
+  { title: 'Restrictions', description: 'Points cannot be transferred, refunded, or converted to cash' },
+];
+
+const referralRules = [
+  { title: 'Referral Bonus', description: 'Earn 100 points when a referred friend makes their first purchase' },
+  { title: 'Friend Benefit', description: 'Your referred friend gets 50 welcome bonus points' },
+  { title: 'Unlimited Referrals', description: 'No limit on how many friends you can refer' },
+  { title: 'Code Validity', description: 'Referral code must be used during signup registration' },
+  { title: 'Active Account', description: 'Both referrer and referee must maintain active accounts' },
+  { title: 'First Purchase Required', description: 'Bonus awarded after referred friend completes first order' },
+];
+
+const tandcPoints = [
+  'Points are earned at 1 point per AED 1 spent on eligible purchases',
+  'Loyalty program is non-transferable and personal to your account',
+  'Milto Coffee reserves the right to modify rewards program terms with 30 days notice',
+  'Fraudulent activity or policy violations will result in account suspension',
+  'Lost referral codes cannot be recovered - store safely',
+  'Points are valid for registered and active members only',
+  'Redemption is final and cannot be reversed',
+  'Program participation implies acceptance of these terms',
 ];
 
 export default function Rewards() {
@@ -84,7 +114,7 @@ export default function Rewards() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-primary">Rewards</h1>
+        <h1 className="font-display text-3xl font-bold text-primary">Rewards & Loyalty</h1>
         <p className="text-muted-foreground mt-1">Earn Coffee Credits with every purchase</p>
       </div>
 
@@ -187,7 +217,7 @@ export default function Rewards() {
       </Card>
 
       <h2 className="font-display text-xl font-bold text-primary mb-4">Membership Tiers</h2>
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4 mb-8">
         {perks.map(p => (
           <Card key={p.tier} className={`border-0 shadow-sm ${account.tier === p.tier.toLowerCase() ? 'ring-2 ring-secondary' : ''}`}>
             <CardContent className="p-5">
@@ -204,6 +234,72 @@ export default function Rewards() {
           </Card>
         ))}
       </div>
+
+      {/* About Rewards */}
+      <Card className="border-0 shadow-sm mb-6">
+        <CardContent className="p-6">
+          <h2 className="font-display text-xl font-bold text-primary mb-4">About Our Rewards Program</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Milto Coffee's loyalty program rewards you for every purchase. Earn Coffee Credits with each transaction, unlock exclusive tier benefits, and enjoy special promotions. As you climb through our membership tiers (Bronze, Silver, Gold, Platinum), you'll gain access to premium perks, exclusive events, and personalized offers designed to enhance your coffee experience.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Redemption Rules */}
+      <Card className="border-0 shadow-sm mb-6">
+        <CardContent className="p-6">
+          <h2 className="font-display text-xl font-bold text-primary mb-4">Redemption Rules</h2>
+          <Accordion type="single" collapsible className="space-y-2">
+            {redemptionRules.map((rule, idx) => (
+              <AccordionItem key={idx} value={`redemption-${idx}`} className="border border-border rounded-lg px-4">
+                <AccordionTrigger className="py-3 hover:no-underline">
+                  <span className="text-sm font-semibold text-primary text-left">{rule.title}</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground pb-3">
+                  {rule.description}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
+
+      {/* Referral Rules */}
+      <Card className="border-0 shadow-sm mb-6">
+        <CardContent className="p-6">
+          <h2 className="font-display text-xl font-bold text-primary mb-4">Referral Rules</h2>
+          <Accordion type="single" collapsible className="space-y-2">
+            {referralRules.map((rule, idx) => (
+              <AccordionItem key={idx} value={`referral-${idx}`} className="border border-border rounded-lg px-4">
+                <AccordionTrigger className="py-3 hover:no-underline">
+                  <span className="text-sm font-semibold text-primary text-left">{rule.title}</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground pb-3">
+                  {rule.description}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
+
+      {/* Terms & Conditions */}
+      <Card className="border-0 shadow-sm mb-8">
+        <CardContent className="p-6">
+          <h2 className="font-display text-xl font-bold text-primary mb-4">Terms & Conditions</h2>
+          <ul className="space-y-3">
+            {tandcPoints.map((point, idx) => (
+              <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-secondary shrink-0 mt-2" />
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground mt-6 pt-4 border-t border-border">
+            Last updated: June 2024. For questions about our rewards program, contact support@miltocoffe.com
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

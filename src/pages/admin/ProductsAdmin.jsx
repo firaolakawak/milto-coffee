@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,9 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Pencil, Trash2, Upload, Download } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, Download, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { useRef } from 'react';
+import React, { useState, useRef } from 'react';
 
 const CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'cold_brew', 'traditional', 'specialty', 'pastries', 'snacks', 'beans'];
 const emptyProduct = { name: '', name_am: '', description: '', description_am: '', category: 'espresso', price: 0, image_url: '', is_available: true, is_featured: false };
@@ -42,7 +41,20 @@ export default function ProductsAdmin() {
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
   const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const filtered = filterCat === 'all' ? products : products.filter(p => p.category === filterCat);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingImage(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    set('image_url', file_url);
+    setUploadingImage(false);
+    toast.success('Image uploaded!');
+    e.target.value = '';
+  };
 
   const handleExport = () => {
     const headers = ['name', 'name_am', 'category', 'price', 'description', 'description_am', 'image_url', 'is_available', 'is_featured'];
@@ -111,7 +123,16 @@ export default function ProductsAdmin() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filtered.map(p => (
-          <Card key={p.id} className="border-0 shadow-sm">
+          <Card key={p.id} className="border-0 shadow-sm overflow-hidden">
+            {p.image_url ? (
+              <div className="h-32 overflow-hidden">
+                <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="h-24 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center">
+                <ImageIcon className="h-8 w-8 text-muted-foreground/30" />
+              </div>
+            )}
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-1">
                 <Badge variant="secondary" className="text-xs capitalize">{p.category?.replace('_', ' ')}</Badge>
@@ -147,7 +168,31 @@ export default function ProductsAdmin() {
             <div><Label className="text-xs">Price (ETB)</Label><Input type="number" value={form.price} onChange={e => set('price', Number(e.target.value))} /></div>
             <div><Label className="text-xs">Description</Label><Textarea value={form.description} onChange={e => set('description', e.target.value)} rows={2} /></div>
             <div><Label className="text-xs">Description (Amharic)</Label><Textarea value={form.description_am} onChange={e => set('description_am', e.target.value)} rows={2} /></div>
-            <div><Label className="text-xs">Image URL</Label><Input value={form.image_url} onChange={e => set('image_url', e.target.value)} /></div>
+            {/* Product Image */}
+            <div>
+              <Label className="text-xs">Product Image</Label>
+              <div className="mt-1 space-y-2">
+                {form.image_url && (
+                  <div className="relative h-36 rounded-xl overflow-hidden border border-border">
+                    <img src={form.image_url} alt="product" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => imageInputRef.current?.click()} disabled={uploadingImage}>
+                  {uploadingImage ? (
+                    <span className="flex items-center gap-2"><div className="w-3 h-3 border-2 border-t-transparent border-primary rounded-full animate-spin" /> Uploading...</span>
+                  ) : (
+                    <span className="flex items-center gap-2"><Upload className="h-3.5 w-3.5" /> {form.image_url ? 'Change Image' : 'Upload Image'}</span>
+                  )}
+                </Button>
+                <Input
+                  value={form.image_url}
+                  onChange={e => set('image_url', e.target.value)}
+                  placeholder="or paste image URL here"
+                  className="text-xs"
+                />
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-xs">Stock Level</Label><Input type="number" value={form.stock_level ?? 100} onChange={e => set('stock_level', Number(e.target.value))} /></div>
               <div><Label className="text-xs">Low Stock Threshold</Label><Input type="number" value={form.stock_threshold ?? 10} onChange={e => set('stock_threshold', Number(e.target.value))} /></div>

@@ -24,7 +24,7 @@ const perks = [
 ];
 
 const redemptionRules = [
-  { title: 'Point Conversion', description: '1 Coffee Credit = AED 1 off your order' },
+  { title: 'Point Conversion', description: '1 Coffee Credit = ETB 1 off your order' },
   { title: 'Minimum Redemption', description: 'Minimum 50 points required for redemption' },
   { title: 'No Expiration', description: 'Your points never expire as long as your account is active' },
   { title: 'Redemption Method', description: 'Select "Redeem Points" at checkout and apply to your order' },
@@ -42,7 +42,7 @@ const referralRules = [
 ];
 
 const tandcPoints = [
-  'Points are earned at 1 point per AED 1 spent on eligible purchases',
+  'Points are earned at 1 point per ETB 1 spent on eligible purchases',
   'Loyalty program is non-transferable and personal to your account',
   'Milto Coffee reserves the right to modify rewards program terms with 30 days notice',
   'Fraudulent activity or policy violations will result in account suspension',

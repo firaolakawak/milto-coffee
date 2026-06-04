@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -12,6 +12,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { CartProvider } from '@/lib/CartContext';
 import AppLayout from '@/components/layout/AppLayout';
 import AdminLayout from '@/components/admin/AdminLayout';
+import PhoneRegistrationModal from '@/components/PhoneRegistrationModal';
 
 // Lazy load all page components
 const Login = React.lazy(() => import('@/pages/Login'));
@@ -47,8 +48,19 @@ const PageLoader = () => (
 );
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
   const location = useLocation();
+  const [showPhoneModal, setShowPhoneModal] = useState(false);
+  const [phoneCheckDone, setPhoneCheckDone] = useState(false);
+
+  useEffect(() => {
+    if (user && !phoneCheckDone) {
+      if (!user.phone) {
+        setShowPhoneModal(true);
+      }
+      setPhoneCheckDone(true);
+    }
+  }, [user, phoneCheckDone]);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -72,6 +84,10 @@ const AuthenticatedApp = () => {
 
   return (
     <CartProvider>
+      <PhoneRegistrationModal
+        open={showPhoneModal}
+        onComplete={() => setShowPhoneModal(false)}
+      />
       <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}

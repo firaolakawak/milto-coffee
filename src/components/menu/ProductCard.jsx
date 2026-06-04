@@ -42,12 +42,19 @@ export default function ProductCard({ product }) {
   return (
     <>
       <Card className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer" onClick={() => setOpen(true)}>
-        <div className="h-40 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center overflow-hidden">
+        <div className="h-40 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center overflow-hidden relative">
           {product.image_url ? (
-            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          ) : (
-            <span className="text-5xl opacity-60">☕</span>
-          )}
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+            />
+          ) : null}
+          <span
+            className="text-5xl opacity-60 absolute inset-0 flex items-center justify-center"
+            style={{ display: product.image_url ? 'none' : 'flex' }}
+          >☕</span>
         </div>
         <CardContent className="p-4">
           <h3 className="font-semibold text-primary text-sm">{product.name}</h3>

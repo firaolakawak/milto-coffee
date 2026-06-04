@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/menu/ProductCard';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
@@ -62,11 +63,14 @@ function groupProducts(products) {
 export default function Menu() {
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
+  const queryClient = useQueryClient();
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
     queryFn: () => base44.entities.Product.list('-created_date', 100),
   });
+
+  const refreshing = usePullToRefresh(() => queryClient.invalidateQueries({ queryKey: ['products'] }));
 
   const filtered = products.filter(p => {
     if (category !== 'all' && p.category !== category) return false;
@@ -85,6 +89,11 @@ export default function Menu() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {refreshing && (
+        <div className="flex justify-center mb-4">
+          <RefreshCw className="h-5 w-5 animate-spin text-secondary" />
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="font-display text-3xl md:text-4xl font-bold text-primary">Our Menu</h1>
         <p className="text-muted-foreground mt-2">Handcrafted with the finest Ethiopian beans</p>

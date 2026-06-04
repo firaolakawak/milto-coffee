@@ -1,12 +1,13 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Package, Clock, ChefHat, Check, Coffee, Truck, ExternalLink } from 'lucide-react';
+import { Package, Clock, ChefHat, Check, Coffee, Truck, ExternalLink, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
@@ -23,15 +24,24 @@ const ACTIVE = ['received', 'preparing', 'ready', 'out_for_delivery'];
 
 export default function Orders() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['my-orders'],
     queryFn: () => base44.entities.Order.filter({ created_by_id: user?.id }, '-created_date', 50),
     enabled: !!user,
   });
 
+  const refreshing = usePullToRefresh(() => queryClient.invalidateQueries({ queryKey: ['my-orders'] }));
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <h1 className="font-display text-2xl font-bold text-primary mb-6">My Orders</h1>
+      {refreshing && (
+        <div className="flex justify-center mb-4">
+          <RefreshCw className="h-5 w-5 animate-spin text-secondary" />
+        </div>
+      )}
       {isLoading ? (
         <div className="space-y-4">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}</div>
       ) : orders.length === 0 ? (

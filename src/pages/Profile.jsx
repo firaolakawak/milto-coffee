@@ -7,8 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Settings, ShoppingBag, Coins, Star, CreditCard } from 'lucide-react';
+import { LogOut, Settings, ShoppingBag, Coins, Star, CreditCard, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import LoyaltyCard from '@/components/profile/LoyaltyCard';
@@ -123,6 +128,33 @@ export default function Profile() {
             <Button variant="outline" className="w-full rounded-full text-destructive border-destructive/30" onClick={() => base44.auth.logout()}>
               <LogOut className="mr-2 h-4 w-4" /> Sign Out
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" className="w-full rounded-full text-destructive/70 hover:text-destructive hover:bg-destructive/10">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action is permanent and cannot be undone. All your orders, rewards, and data will be lost.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={async () => {
+                      await base44.auth.updateMe({ deleted: true });
+                      base44.auth.logout();
+                    }}
+                  >
+                    Yes, Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
       )}

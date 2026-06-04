@@ -90,5 +90,10 @@
   }
   body {
     @apply bg-background text-foreground font-body;
+    overscroll-behavior: none;
+  }
+  button, [role="tab"] {
+    user-select: none;
+    -webkit-user-select: none;
   }
 }

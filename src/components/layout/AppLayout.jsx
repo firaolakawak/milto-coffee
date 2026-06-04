@@ -1,6 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import BottomTabs from './BottomTabs';
+import MobileHeader from './MobileHeader';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { MapPin, Clock, Phone } from 'lucide-react';
@@ -12,9 +14,10 @@ export default function AppLayout() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <Navbar />
-      <main>
+      <MobileHeader />
+      <main className="pb-20 md:pb-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 5rem)' }}>
         <Outlet />
       </main>
       <footer className="bg-primary text-primary-foreground py-12">
@@ -91,6 +94,7 @@ export default function AppLayout() {
           © 2026 Milto Coffee. All rights reserved.
         </div>
       </footer>
+      <BottomTabs />
     </div>
   );
 }

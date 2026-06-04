@@ -71,20 +71,25 @@ const AuthenticatedApp = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
+        {/* Public pages — no login required */}
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/origins" element={<Origins />} />
+          <Route path="/stores" element={<Stores />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+        </Route>
+
+        {/* Protected pages — login required */}
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route element={<AppLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/menu" element={<Menu />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/track/:orderId" element={<OrderTracking />} />
-            <Route path="/origins" element={<Origins />} />
-            <Route path="/stores" element={<Stores />} />
             <Route path="/rewards" element={<Rewards />} />
-            <Route path="/events" element={<Events />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
           </Route>
 
           <Route element={<AdminLayout />}>

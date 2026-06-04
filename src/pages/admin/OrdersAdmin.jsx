@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, ChefHat, Coffee, Check, X, Search } from 'lucide-react';
+import { Clock, ChefHat, Coffee, Check, X, Search, Truck } from 'lucide-react';
 import { format } from 'date-fns';
 
+// Delivery flow:  received → preparing → out_for_delivery → completed
+// Pickup flow:    received → preparing → ready → completed
 const statusConfig = {
-  received: { label: 'Received', icon: Clock, color: 'bg-blue-100 text-blue-700', next: 'preparing' },
-  preparing: { label: 'Preparing', icon: ChefHat, color: 'bg-amber-100 text-amber-700', next: 'ready' },
-  ready: { label: 'Ready', icon: Coffee, color: 'bg-green-100 text-green-700', next: 'completed' },
-  completed: { label: 'Completed', icon: Check, color: 'bg-slate-100 text-slate-600', next: null },
-  cancelled: { label: 'Cancelled', icon: X, color: 'bg-red-100 text-red-600', next: null },
+  received:         { label: 'Received',        icon: Clock,    color: 'bg-blue-100 text-blue-700',    nextPickup: 'preparing',        nextDelivery: 'preparing' },
+  preparing:        { label: 'Preparing',        icon: ChefHat,  color: 'bg-amber-100 text-amber-700',  nextPickup: 'ready',            nextDelivery: 'out_for_delivery' },
+  ready:            { label: 'Ready',            icon: Coffee,   color: 'bg-green-100 text-green-700',  nextPickup: 'completed',        nextDelivery: null },
+  out_for_delivery: { label: 'Out for Delivery', icon: Truck,    color: 'bg-purple-100 text-purple-700',nextPickup: null,               nextDelivery: 'completed' },
+  completed:        { label: 'Completed',        icon: Check,    color: 'bg-slate-100 text-slate-600',  nextPickup: null,               nextDelivery: null },
+  cancelled:        { label: 'Cancelled',        icon: X,        color: 'bg-red-100 text-red-600',      nextPickup: null,               nextDelivery: null },
 };
 
 export default function OrdersAdmin() {
@@ -47,6 +49,12 @@ export default function OrdersAdmin() {
     return true;
   });
 
+  const getNextStatus = (order) => {
+    const status = statusConfig[order.status];
+    if (!status) return null;
+    return order.delivery_type === 'delivery' ? status.nextDelivery : status.nextPickup;
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -63,7 +71,7 @@ export default function OrdersAdmin() {
           <TabsList className="bg-transparent p-0 flex flex-wrap gap-1 h-auto">
             <TabsTrigger value="all" className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All</TabsTrigger>
             {Object.entries(statusConfig).map(([key, val]) => (
-              <TabsTrigger key={key} value={key} className={`rounded-full text-xs px-3 data-[state=active]:${val.color}`}>{val.label}</TabsTrigger>
+              <TabsTrigger key={key} value={key} className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{val.label}</TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
@@ -73,6 +81,9 @@ export default function OrdersAdmin() {
         {filtered.map(order => {
           const status = statusConfig[order.status] || statusConfig.received;
           const StatusIcon = status.icon;
+          const nextStatus = getNextStatus(order);
+          const isDelivery = order.delivery_type === 'delivery';
+
           return (
             <Card key={order.id} className="border-0 shadow-sm">
               <CardContent className="p-4">
@@ -80,14 +91,19 @@ export default function OrdersAdmin() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <span className="font-bold text-sm">#{order.order_number}</span>
-                      <Badge className={`${status.color} border-0 gap-1 text-xs`}><StatusIcon className="h-3 w-3" /> {status.label}</Badge>
+                      <Badge className={`${status.color} border-0 gap-1 text-xs`}>
+                        <StatusIcon className="h-3 w-3" /> {status.label}
+                      </Badge>
+                      <Badge className={`border-0 text-xs ${isDelivery ? 'bg-purple-50 text-purple-700' : 'bg-muted text-muted-foreground'}`}>
+                        {isDelivery ? '🛵 Delivery' : '🏪 Pickup'}
+                      </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {order.customer_name} · {order.branch_name} · {format(new Date(order.created_date), 'MMM d, h:mm a')}
-                      {order.delivery_type === 'delivery'
-                        ? <span className="ml-1 text-purple-600">🛵 Delivery{order.delivery_address ? `: ${order.delivery_address}` : ''}</span>
-                        : <span className="ml-1">🏪 Pickup</span>}
                     </p>
+                    {isDelivery && order.delivery_address && (
+                      <p className="text-xs text-purple-600 mt-0.5">📍 {order.delivery_address}</p>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-2">
                       {order.items?.map((item, i) => (
                         <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded-full">{item.quantity}x {item.product_name}</span>
@@ -96,14 +112,16 @@ export default function OrdersAdmin() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-bold text-secondary">{order.total} ETB</span>
-                    {(() => {
-                      const nextStatus = order.delivery_type === 'delivery' ? status.nextDelivery : status.nextPickup;
-                      return nextStatus ? (
-                        <Button size="sm" className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90" onClick={() => updateStatus.mutate({ id: order.id, status: nextStatus })}>
-                          → {statusConfig[nextStatus]?.label}
-                        </Button>
-                      ) : null;
-                    })()}
+                    {nextStatus && (
+                      <Button
+                        size="sm"
+                        className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                        disabled={updateStatus.isPending}
+                        onClick={() => updateStatus.mutate({ id: order.id, status: nextStatus })}
+                      >
+                        → {statusConfig[nextStatus]?.label}
+                      </Button>
+                    )}
                     {order.status !== 'cancelled' && order.status !== 'completed' && (
                       <Button size="sm" variant="ghost" className="text-destructive" onClick={() => updateStatus.mutate({ id: order.id, status: 'cancelled' })}>
                         <X className="h-3 w-3" />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Store, Coffee, ClipboardList, Award, Calendar, Megaphone, ArrowLeft, Leaf, PackageSearch } from 'lucide-react';
+import { LayoutDashboard, Store, Coffee, ClipboardList, Award, Calendar, Megaphone, ArrowLeft, Leaf, PackageSearch, Bell } from 'lucide-react';
 
 const navItems = [
 { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -13,7 +13,8 @@ const navItems = [
 { path: '/admin/events', icon: Calendar, label: 'Events' },
 
 { path: '/admin/branches', icon: Store, label: 'Branches' },
-{ path: '/admin/origins', icon: Leaf, label: 'Origins' }];
+{ path: '/admin/origins', icon: Leaf, label: 'Origins' },
+{ path: '/admin/push', icon: Bell, label: 'Push Notifications' }];
 
 
 export default function AdminLayout() {

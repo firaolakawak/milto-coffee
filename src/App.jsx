@@ -38,6 +38,7 @@ const EventsAdmin = React.lazy(() => import('@/pages/admin/EventsAdmin'));
 const PromotionsAdmin = React.lazy(() => import('@/pages/admin/PromotionsAdmin'));
 const OriginsAdmin = React.lazy(() => import('@/pages/admin/OriginsAdmin'));
 const StockInventory = React.lazy(() => import('@/pages/admin/StockInventory'));
+const PushNotificationsAdmin = React.lazy(() => import('@/pages/admin/PushNotificationsAdmin'));
 const About = React.lazy(() => import('@/pages/About'));
 const Contact = React.lazy(() => import('@/pages/Contact'));
 
@@ -134,6 +135,7 @@ const AuthenticatedApp = () => {
             <Route path="/admin/promotions" element={<Suspense fallback={<PageLoader />}><PromotionsAdmin /></Suspense>} />
             <Route path="/admin/origins" element={<Suspense fallback={<PageLoader />}><OriginsAdmin /></Suspense>} />
             <Route path="/admin/stock" element={<Suspense fallback={<PageLoader />}><StockInventory /></Suspense>} />
+            <Route path="/admin/push" element={<Suspense fallback={<PageLoader />}><PushNotificationsAdmin /></Suspense>} />
           </Route>
         </Route>
 

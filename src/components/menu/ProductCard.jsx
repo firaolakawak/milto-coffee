@@ -96,7 +96,7 @@ export default function ProductCard({ group }) {
           >☕</span>
         </div>
         <CardContent className="p-4">
-          <h3 className="font-semibold text-primary text-sm">{group.baseName}</h3>
+          <h3 className="font-semibold text-primary text-sm">{group.baseName}</h2>
           {isGrouped && (
             <p className="text-xs text-muted-foreground mt-0.5">{products.length} variants</p>
           )}

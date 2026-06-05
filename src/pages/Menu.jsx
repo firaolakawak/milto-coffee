@@ -7,6 +7,7 @@ import { Search, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProductCard from '@/components/menu/ProductCard';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import BirthdayPromptModal from '@/components/BirthdayPromptModal';
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
@@ -89,6 +90,7 @@ export default function Menu() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <BirthdayPromptModal />
       {refreshing && (
         <div className="flex justify-center mb-4">
           <RefreshCw className="h-5 w-5 animate-spin text-secondary" />

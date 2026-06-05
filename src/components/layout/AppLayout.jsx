@@ -6,6 +6,7 @@ import MobileHeader from './MobileHeader';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { MapPin, Clock, Phone } from 'lucide-react';
+import PushNotificationPromptModal from '@/components/PushNotificationPromptModal';
 
 export default function AppLayout() {
   const { data: branches = [] } = useQuery({
@@ -15,6 +16,7 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      <PushNotificationPromptModal />
       <Navbar />
       <MobileHeader />
       <main className="pb-20 md:pb-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 5rem)' }}>

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Award, Star, Crown, Gem, Gift, Users, TrendingUp, Bell, X, Copy, Check, ChevronDown } from 'lucide-react';
+import { Award, Star, Crown, Gem, Gift, Users, Bell, X, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import JoinRewardForm from '@/components/rewards/JoinRewardForm';
 
 const tierConfig = {
   bronze: { icon: Award, color: 'text-amber-700', bg: 'bg-amber-100', next: 'silver', pointsNeeded: 500 },
@@ -54,11 +55,12 @@ const tandcPoints = [
 
 export default function Rewards() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [dismissedNotifications, setDismissedNotifications] = useState(new Set());
   const [copiedCode, setCopiedCode] = useState(false);
   const [referralCount, setReferralCount] = useState(0);
   
-  const { data: accounts = [] } = useQuery({
+  const { data: accounts = [], isLoading: accountsLoading } = useQuery({
     queryKey: ['loyalty-account'],
     queryFn: () => base44.entities.LoyaltyAccount.filter({ created_by_id: user?.id }),
     enabled: !!user,
@@ -111,11 +113,19 @@ export default function Rewards() {
     }
   };
 
+  if (!accountsLoading && user && accounts.length === 0) {
+    return (
+      <JoinRewardForm
+        onJoined={() => queryClient.invalidateQueries({ queryKey: ['loyalty-account'] })}
+      />
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-primary">Rewards & Loyalty</h1>
-        <p className="text-muted-foreground mt-1">Earn Coffee Credits with every purchase</p>
+        <h1 className="font-heading text-3xl font-bold text-primary">Rewards & Loyalty</h1>
+        <p className="font-body text-muted-foreground mt-1">Earn Coffee Credits with every purchase</p>
       </div>
 
       {/* Recent Notifications */}
@@ -151,7 +161,7 @@ export default function Rewards() {
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Users className="h-5 w-5 text-secondary" />
-              <h2 className="font-display text-lg font-bold text-primary">Share & Earn</h2>
+              <h2 className="font-heading text-lg font-bold text-primary">Share & Earn</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">Invite friends with your referral code and earn 100 bonus points for each successful sign-up!</p>
             
@@ -216,7 +226,7 @@ export default function Rewards() {
         </CardContent>
       </Card>
 
-      <h2 className="font-display text-xl font-bold text-primary mb-4">Membership Tiers</h2>
+      <h2 className="font-heading text-xl font-semibold text-primary mb-4">Membership Tiers</h2>
       <div className="grid sm:grid-cols-2 gap-4 mb-8">
         {perks.map(p => (
           <Card key={p.tier} className={`border-0 shadow-sm ${account.tier === p.tier.toLowerCase() ? 'ring-2 ring-secondary' : ''}`}>
@@ -238,7 +248,7 @@ export default function Rewards() {
       {/* About Rewards */}
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-6">
-          <h2 className="font-display text-xl font-bold text-primary mb-4">About Our Rewards Program</h2>
+          <h2 className="font-heading text-xl font-semibold text-primary mb-4">About Our Rewards Program</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Milto Coffee's loyalty program rewards you for every purchase. Earn Coffee Credits with each transaction, unlock exclusive tier benefits, and enjoy special promotions. As you climb through our membership tiers (Bronze, Silver, Gold, Platinum), you'll gain access to premium perks, exclusive events, and personalized offers designed to enhance your coffee experience.
           </p>
@@ -248,7 +258,7 @@ export default function Rewards() {
       {/* Redemption Rules */}
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-6">
-          <h2 className="font-display text-xl font-bold text-primary mb-4">Redemption Rules</h2>
+          <h2 className="font-heading text-xl font-semibold text-primary mb-4">Redemption Rules</h2>
           <Accordion type="single" collapsible className="space-y-2">
             {redemptionRules.map((rule, idx) => (
               <AccordionItem key={idx} value={`redemption-${idx}`} className="border border-border rounded-lg px-4">
@@ -267,7 +277,7 @@ export default function Rewards() {
       {/* Referral Rules */}
       <Card className="border-0 shadow-sm mb-6">
         <CardContent className="p-6">
-          <h2 className="font-display text-xl font-bold text-primary mb-4">Referral Rules</h2>
+          <h2 className="font-heading text-xl font-semibold text-primary mb-4">Referral Rules</h2>
           <Accordion type="single" collapsible className="space-y-2">
             {referralRules.map((rule, idx) => (
               <AccordionItem key={idx} value={`referral-${idx}`} className="border border-border rounded-lg px-4">
@@ -286,7 +296,7 @@ export default function Rewards() {
       {/* Terms & Conditions */}
       <Card className="border-0 shadow-sm mb-8">
         <CardContent className="p-6">
-          <h2 className="font-display text-xl font-bold text-primary mb-4">Terms & Conditions</h2>
+          <h2 className="font-heading text-xl font-semibold text-primary mb-4">Terms & Conditions</h2>
           <ul className="space-y-3">
             {tandcPoints.map((point, idx) => (
               <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground">

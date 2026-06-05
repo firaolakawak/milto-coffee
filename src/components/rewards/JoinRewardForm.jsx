@@ -4,23 +4,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Award, Star, Crown, Gem, Gift, CheckCircle2 } from 'lucide-react';
-
-const tiers = [
-  { name: 'Bronze', icon: Award, color: 'text-amber-700', bg: 'bg-amber-50', desc: 'Start earning' },
-  { name: 'Silver', icon: Star, color: 'text-slate-500', bg: 'bg-slate-50', desc: '500+ pts' },
-  { name: 'Gold', icon: Crown, color: 'text-yellow-600', bg: 'bg-yellow-50', desc: '1,500+ pts' },
-  { name: 'Platinum', icon: Gem, color: 'text-violet-600', bg: 'bg-violet-50', desc: '3,000+ pts' },
-];
-
-const benefits = [
-  'Earn 1 Credit per ETB 1 spent',
-  'Exclusive member-only promotions',
-  'Birthday free drink every year',
-  'Priority ordering for Gold & Platinum',
-  'Invite friends & earn bonus points',
-];
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CheckCircle2 } from 'lucide-react';
 
 function generateReferralCode(name) {
   const prefix = (name || 'MILTO').replace(/\s+/g, '').substring(0, 4).toUpperCase();
@@ -31,12 +16,17 @@ function generateReferralCode(name) {
 export default function JoinRewardForm({ onJoined }) {
   const { user } = useAuth();
   const [referralCode, setReferralCode] = useState('');
+  const [birthdayMonth, setBirthdayMonth] = useState('');
+  const [birthdayDay, setBirthdayDay] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [joined, setJoined] = useState(false);
 
   const handleJoin = async (e) => {
     e.preventDefault();
+    if (!agreed) return;
     setLoading(true);
+
     const newCode = generateReferralCode(user?.full_name);
     await base44.entities.LoyaltyAccount.create({
       user_name: user?.full_name || '',
@@ -48,6 +38,15 @@ export default function JoinRewardForm({ onJoined }) {
       ...(referralCode.trim() && { referred_by: referralCode.trim().toUpperCase() }),
       badges: ['early_member'],
     });
+
+    // Save birthday if provided
+    if (birthdayMonth && birthdayDay) {
+      await base44.auth.updateMe({
+        birthday_day: parseInt(birthdayDay),
+        birthday_month: parseInt(birthdayMonth),
+      });
+    }
+
     setJoined(true);
     setLoading(false);
     setTimeout(() => onJoined?.(), 1800);
@@ -60,101 +59,135 @@ export default function JoinRewardForm({ onJoined }) {
           <CheckCircle2 className="h-8 w-8 text-green-600" />
         </div>
         <h2 className="font-heading text-2xl font-bold text-primary mb-2">Welcome to Milto Rewards!</h2>
-        <p className="font-body text-muted-foreground">You've received 50 welcome bonus points 🎉</p>
+        <p className="text-muted-foreground">You've received 50 welcome bonus points 🎉</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Hero */}
-      <div className="text-center mb-8">
-        <p className="font-display text-lg text-secondary italic mb-2">Your Coffee Journey, Rewarded</p>
-        <h1 className="font-heading text-4xl font-bold text-primary mb-3">Join Milto Rewards</h1>
-        <p className="font-body text-muted-foreground max-w-sm mx-auto leading-relaxed">
-          Earn Coffee Credits on every order. Unlock exclusive perks as you climb from Bronze to Platinum.
+    <div className="max-w-md mx-auto px-5 py-8">
+
+      {/* Logo & Hero */}
+      <div className="flex flex-col items-center mb-6">
+        <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center mb-4 shadow-lg">
+          <span className="text-4xl">☕</span>
+        </div>
+        <h1 className="font-heading text-2xl font-bold text-primary text-center">Join now</h1>
+        <p className="text-sm text-muted-foreground text-center mt-2 leading-relaxed">
+          Join Milto Rewards to collect Stars and earn free drinks! Manage your account, track your Rewards and other useful stuff. Join now to get started.
         </p>
+        <p className="text-xs text-muted-foreground mt-2">* Required fields are marked with an asterisk*</p>
       </div>
 
-      {/* Tier ladder */}
-      <div className="grid grid-cols-4 gap-3 mb-8">
-        {tiers.map((t) => {
-          const Icon = t.icon;
-          return (
-            <div key={t.name} className={`${t.bg} rounded-xl p-3 text-center border border-border/50`}>
-              <div className="flex justify-center mb-2">
-                <Icon className={`h-6 w-6 ${t.color}`} />
-              </div>
-              <p className="font-heading text-xs font-semibold text-primary">{t.name}</p>
-              <p className="font-body text-xs text-muted-foreground">{t.desc}</p>
+      <form onSubmit={handleJoin} className="space-y-6">
+
+        {/* Personal Information */}
+        <div>
+          <h2 className="font-heading text-base font-semibold text-foreground mb-3">Personal Information</h2>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-sm">* First name</Label>
+              <Input
+                value={(user?.full_name || '').split(' ')[0]}
+                disabled
+                className="mt-1 bg-muted/50"
+              />
             </div>
-          );
-        })}
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-5">
-        {/* Benefits card */}
-        <Card className="border-0 shadow-sm bg-muted/40">
-          <CardContent className="p-5">
-            <h3 className="font-heading text-base font-semibold text-primary mb-4">What You Get</h3>
-            <ul className="space-y-3">
-              {benefits.map((b, i) => (
-                <li key={i} className="flex items-start gap-2.5">
-                  <Gift className="h-4 w-4 text-secondary shrink-0 mt-0.5" />
-                  <span className="font-body text-sm text-muted-foreground">{b}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-5 pt-4 border-t border-border">
-              <p className="font-heading text-sm font-semibold text-secondary">🎉 Welcome Bonus</p>
-              <p className="font-body text-xs text-muted-foreground mt-1">
-                Get <span className="font-semibold text-primary">50 Coffee Credits</span> just for joining — on us.
-              </p>
+            <div>
+              <Label className="text-sm">* Last name</Label>
+              <Input
+                value={(user?.full_name || '').split(' ').slice(1).join(' ')}
+                disabled
+                className="mt-1 bg-muted/50"
+              />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Sign-up form */}
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-5">
-            <h3 className="font-heading text-base font-semibold text-primary mb-4">Complete Your Profile</h3>
-            <form onSubmit={handleJoin} className="space-y-4">
-              <div>
-                <Label className="font-body text-sm font-medium mb-1.5 block">Full Name</Label>
-                <Input value={user?.full_name || ''} disabled className="bg-muted font-body" />
-              </div>
-              <div>
-                <Label className="font-body text-sm font-medium mb-1.5 block">Email</Label>
-                <Input value={user?.email || ''} disabled className="bg-muted font-body" />
-              </div>
-              <div>
-                <Label className="font-body text-sm font-medium mb-1.5 block">
-                  Referral Code{' '}
-                  <span className="text-muted-foreground font-normal text-xs">(optional)</span>
-                </Label>
-                <Input
-                  placeholder="e.g. ABEL2024"
-                  value={referralCode}
-                  onChange={e => setReferralCode(e.target.value)}
-                  className="font-mono uppercase tracking-widest placeholder:normal-case placeholder:tracking-normal"
-                  maxLength={10}
-                />
-              </div>
-              <Button
-                type="submit"
-                className="w-full font-body font-medium"
-                disabled={loading}
-              >
-                {loading ? 'Joining...' : 'Join Milto Rewards — Free'}
-              </Button>
-              <p className="font-body text-xs text-muted-foreground text-center leading-relaxed">
-                By joining, you accept our{' '}
-                <span className="underline cursor-pointer">rewards program terms</span>.
-              </p>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+        <hr className="border-border" />
+
+        {/* Account Security */}
+        <div>
+          <h2 className="font-heading text-base font-semibold text-foreground mb-3">Account security</h2>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-sm">* Email</Label>
+              <Input value={user?.email || ''} disabled className="mt-1 bg-muted/50" />
+              <p className="text-xs text-muted-foreground mt-1">This will be your username</p>
+            </div>
+            <div>
+              <Label className="text-sm">Referral Code <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Input
+                placeholder="e.g. ABEL2024"
+                value={referralCode}
+                onChange={e => setReferralCode(e.target.value)}
+                className="mt-1 font-mono uppercase tracking-widest placeholder:normal-case placeholder:tracking-normal"
+                maxLength={10}
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr className="border-border" />
+
+        {/* Birthday */}
+        <div>
+          <h2 className="font-heading text-base font-semibold text-foreground mb-1">Your birthday (optional)</h2>
+          <p className="text-xs text-muted-foreground mb-3">Get a free drink on your birthday 🎂</p>
+          <div className="grid grid-cols-2 gap-3">
+            <Select value={birthdayMonth} onValueChange={setBirthdayMonth}>
+              <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+              <SelectContent>
+                {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                  <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={birthdayDay} onValueChange={setBirthdayDay}>
+              <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 31 }, (_, i) => (
+                  <SelectItem key={i} value={String(i + 1)}>{i + 1}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <hr className="border-border" />
+
+        {/* Terms */}
+        <div>
+          <h2 className="font-heading text-base font-semibold text-foreground mb-3">Terms of Use</h2>
+          <div className="space-y-2 text-xs text-muted-foreground mb-4">
+            <p><span className="underline cursor-pointer text-primary">FAQ</span> ↗</p>
+            <p><span className="underline cursor-pointer text-primary">Privacy Statement</span> ↗</p>
+            <p><span className="underline cursor-pointer text-primary">Terms of Use</span> ↗</p>
+          </div>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={e => setAgreed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+            />
+            <span className="text-xs text-muted-foreground leading-relaxed">
+              By tapping "Join Rewards" you accept and agree to the following terms and policies:{' '}
+              <span className="underline cursor-pointer">Milto Rewards Terms and Conditions</span> and{' '}
+              <span className="underline cursor-pointer">Terms of Use</span>.
+            </span>
+          </label>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-full h-11 text-base font-semibold"
+          disabled={loading || !agreed}
+        >
+          {loading ? 'Joining...' : 'Join Rewards'}
+        </Button>
+
+      </form>
     </div>
   );
 }

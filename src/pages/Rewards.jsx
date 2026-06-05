@@ -10,6 +10,7 @@ import { Award, Star, Crown, Gem, Gift, Bell, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import JoinRewardForm from '@/components/rewards/JoinRewardForm';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 const tierConfig = {
   bronze: { icon: Award, color: 'text-amber-700', bg: 'bg-amber-100', next: 'silver', pointsNeeded: 500 },
@@ -169,6 +170,10 @@ export default function Rewards() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="mb-6">
+        <PushNotificationManager />
+      </div>
 
       <h2 className="font-heading text-xl font-semibold text-primary mb-4">Membership Tiers</h2>
       <div className="grid sm:grid-cols-2 gap-4 mb-8">

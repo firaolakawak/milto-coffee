@@ -9,6 +9,7 @@ import StockAlerts from '@/components/admin/StockAlerts';
 import SalesTrendsChart from '@/components/admin/SalesTrendsChart';
 import LowStockTable from '@/components/admin/LowStockTable';
 import BranchPerformanceChart from '@/components/admin/BranchPerformanceChart';
+import PushNotificationBroadcast from '@/components/admin/PushNotificationBroadcast';
 
 export default function Dashboard() {
   const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: () => base44.entities.Order.list('-created_date', 100) });
@@ -65,6 +66,16 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Push Notifications Broadcast */}
+      <Card className="border-0 shadow-sm mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">📣 Push Notifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PushNotificationBroadcast />
+        </CardContent>
+      </Card>
 
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-sm">

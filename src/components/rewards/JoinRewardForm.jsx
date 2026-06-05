@@ -27,29 +27,34 @@ export default function JoinRewardForm({ onJoined }) {
     if (!agreed) return;
     setLoading(true);
 
-    const newCode = generateReferralCode(user?.full_name);
-    await base44.entities.LoyaltyAccount.create({
-      user_name: user?.full_name || '',
-      points: 50,
-      total_points_earned: 50,
-      tier: 'bronze',
-      total_orders: 0,
-      referral_code: newCode,
-      ...(referralCode.trim() && { referred_by: referralCode.trim().toUpperCase() }),
-      badges: ['early_member'],
-    });
-
-    // Save birthday if provided
-    if (birthdayMonth && birthdayDay) {
-      await base44.auth.updateMe({
-        birthday_day: parseInt(birthdayDay),
-        birthday_month: parseInt(birthdayMonth),
+    try {
+      const newCode = generateReferralCode(user?.full_name);
+      await base44.entities.LoyaltyAccount.create({
+        user_name: user?.full_name || '',
+        points: 50,
+        total_points_earned: 50,
+        tier: 'bronze',
+        total_orders: 0,
+        referral_code: newCode,
+        ...(referralCode.trim() && { referred_by: referralCode.trim().toUpperCase() }),
+        badges: ['early_member'],
       });
-    }
 
-    setJoined(true);
-    setLoading(false);
-    setTimeout(() => onJoined?.(), 1800);
+      // Save birthday if provided
+      if (birthdayMonth && birthdayDay) {
+        await base44.auth.updateMe({
+          birthday_day: parseInt(birthdayDay),
+          birthday_month: parseInt(birthdayMonth),
+        });
+      }
+
+      setJoined(true);
+      setTimeout(() => onJoined?.(), 1800);
+    } catch (err) {
+      console.error('Join rewards failed:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (joined) {

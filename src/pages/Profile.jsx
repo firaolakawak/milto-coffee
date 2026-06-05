@@ -66,13 +66,21 @@ export default function Profile() {
 
   const handleSave = async () => {
     setSaving(true);
-    await base44.auth.updateMe({
+    const updates = {
       phone,
       preferred_language: language,
       favorite_coffee: favCoffee,
-      ...(birthdayDay && { birthday_day: parseInt(birthdayDay) }),
-      ...(birthdayMonth && { birthday_month: parseInt(birthdayMonth) }),
-    });
+    };
+    // Only save birthday if not already set
+    if (!user?.birthday_day && birthdayDay) updates.birthday_day = parseInt(birthdayDay);
+    if (!user?.birthday_month && birthdayMonth) updates.birthday_month = parseInt(birthdayMonth);
+
+    const updated = await base44.auth.updateMe(updates);
+    // Sync local state from freshly saved user
+    if (updated) {
+      setBirthdayDay(updated.birthday_day ? String(updated.birthday_day) : birthdayDay);
+      setBirthdayMonth(updated.birthday_month ? String(updated.birthday_month) : birthdayMonth);
+    }
     toast.success('Profile updated!');
     setSaving(false);
   };
@@ -124,24 +132,33 @@ export default function Profile() {
             <div>
               <Label className="text-sm">Birthday</Label>
               <p className="text-xs text-muted-foreground mb-2">Used for your free birthday drink 🎂</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Select value={birthdayMonth} onValueChange={setBirthdayMonth}>
-                  <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
-                  <SelectContent>
-                    {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
-                      <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={birthdayDay} onValueChange={setBirthdayDay}>
-                  <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 31 }, (_, i) => (
-                      <SelectItem key={i} value={String(i + 1)}>{i + 1}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {user?.birthday_day && user?.birthday_month ? (
+                <div className="flex items-center gap-2 bg-muted/60 rounded-lg px-4 py-2.5 border border-border">
+                  <span className="text-sm font-medium text-primary">
+                    {['January','February','March','April','May','June','July','August','September','October','November','December'][user.birthday_month - 1]} {user.birthday_day}
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-auto">🔒 Cannot be changed</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <Select value={birthdayMonth} onValueChange={setBirthdayMonth}>
+                    <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+                    <SelectContent>
+                      {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                        <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={birthdayDay} onValueChange={setBirthdayDay}>
+                    <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 31 }, (_, i) => (
+                        <SelectItem key={i} value={String(i + 1)}>{i + 1}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Settings, ShoppingBag, Coins, Star, CreditCard, Trash2 } from 'lucide-react';
+import { LogOut, Settings, ShoppingBag, Coins, Star, CreditCard, Trash2, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -35,8 +35,11 @@ export default function Profile() {
   const [phone, setPhone] = useState('');
   const [language, setLanguage] = useState('en');
   const [favCoffee, setFavCoffee] = useState('');
+  const [birthdayDay, setBirthdayDay] = useState('');
+  const [birthdayMonth, setBirthdayMonth] = useState('');
   const [saving, setSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [copiedCode, setCopiedCode] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -44,6 +47,8 @@ export default function Profile() {
       setLanguage(user.preferred_language || 'en');
       setFavCoffee(user.favorite_coffee || '');
       setAvatarUrl(user.avatar_url || '');
+      setBirthdayDay(user.birthday_day ? String(user.birthday_day) : '');
+      setBirthdayMonth(user.birthday_month ? String(user.birthday_month) : '');
     }
   }, [user]);
 
@@ -61,7 +66,13 @@ export default function Profile() {
 
   const handleSave = async () => {
     setSaving(true);
-    await base44.auth.updateMe({ phone, preferred_language: language, favorite_coffee: favCoffee });
+    await base44.auth.updateMe({
+      phone,
+      preferred_language: language,
+      favorite_coffee: favCoffee,
+      ...(birthdayDay && { birthday_day: parseInt(birthdayDay) }),
+      ...(birthdayMonth && { birthday_month: parseInt(birthdayMonth) }),
+    });
     toast.success('Profile updated!');
     setSaving(false);
   };
@@ -108,6 +119,31 @@ export default function Profile() {
               <Label className="text-sm">Phone Number</Label>
               <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+251 9XX XXX XXX" className="mt-1" />
             </div>
+
+            {/* Birthday */}
+            <div>
+              <Label className="text-sm">Birthday</Label>
+              <p className="text-xs text-muted-foreground mb-2">Used for your free birthday drink 🎂</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Select value={birthdayMonth} onValueChange={setBirthdayMonth}>
+                  <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+                  <SelectContent>
+                    {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                      <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={birthdayDay} onValueChange={setBirthdayDay}>
+                  <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 31 }, (_, i) => (
+                      <SelectItem key={i} value={String(i + 1)}>{i + 1}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
               <Label className="text-sm">Preferred Language</Label>
               <Select value={language} onValueChange={setLanguage}>
@@ -122,6 +158,28 @@ export default function Profile() {
               <Label className="text-sm">Favorite Coffee</Label>
               <Input value={favCoffee} onChange={e => setFavCoffee(e.target.value)} placeholder="e.g. Ethiopian Macchiato" className="mt-1" />
             </div>
+
+            {/* Referral Code */}
+            {loyaltyAccount?.referral_code && (
+              <div>
+                <Label className="text-sm">Your Referral Code</Label>
+                <p className="text-xs text-muted-foreground mb-2">Share with friends — earn 100 points per successful referral</p>
+                <div className="flex items-center gap-2 bg-muted rounded-lg px-4 py-3 border border-border">
+                  <code className="font-mono font-bold text-primary text-base flex-1">{loyaltyAccount.referral_code}</code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(loyaltyAccount.referral_code);
+                      setCopiedCode(true);
+                      setTimeout(() => setCopiedCode(false), 2000);
+                    }}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {copiedCode ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            )}
             <Button onClick={handleSave} disabled={saving} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full">
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>

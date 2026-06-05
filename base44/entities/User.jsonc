@@ -30,6 +30,14 @@
       "items": {
         "type": "string"
       }
+    },
+    "birthday_day": {
+      "type": "number",
+      "description": "Day of birth (1\u201331)"
+    },
+    "birthday_month": {
+      "type": "number",
+      "description": "Month of birth (1\u201312)"
     }
   },
   "required": [

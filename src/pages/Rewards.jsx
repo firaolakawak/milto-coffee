@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Award, Star, Crown, Gem, Gift, Bell, X } from 'lucide-react';
+import { Award, Star, Crown, Gem, Gift, Bell, X, Copy, Check, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import JoinRewardForm from '@/components/rewards/JoinRewardForm';
@@ -74,6 +74,12 @@ export default function Rewards() {
   });
 
   const account = accounts[0] || { points: 0, total_points_earned: 0, tier: 'bronze', total_orders: 0, badges: [], referral_code: null };
+
+  const { data: referredAccounts = [] } = useQuery({
+    queryKey: ['referred-accounts', account.referral_code],
+    queryFn: () => base44.entities.LoyaltyAccount.filter({ referred_by: account.referral_code }),
+    enabled: !!account.referral_code,
+  });
 
 
   const tier = tierConfig[account.tier] || tierConfig.bronze;
@@ -180,6 +186,43 @@ export default function Rewards() {
       <div className="mb-6">
         <PushNotificationManager />
       </div>
+
+      {/* Referral Code Section — members only */}
+      {accounts.length > 0 && account.referral_code && (
+        <Card className="border-0 shadow-sm mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-5 w-5 text-secondary" />
+              <h2 className="font-heading text-xl font-semibold text-primary">Your Referral Code</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Share your code with friends. You earn <span className="font-semibold text-primary">100 points</span> and your friend gets <span className="font-semibold text-primary">50 bonus points</span> after their first order.
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 bg-muted rounded-xl px-4 py-3 font-mono text-lg font-bold text-primary tracking-widest text-center">
+                {account.referral_code}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-12 w-12 rounded-xl shrink-0"
+                onClick={copyReferralCode}
+              >
+                {copiedCode ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+              </Button>
+            </div>
+            <div className="mt-4 flex items-center gap-3 bg-secondary/10 rounded-xl px-4 py-3">
+              <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
+                <Users className="h-5 w-5 text-secondary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary">{referredAccounts.length}</p>
+                <p className="text-xs text-muted-foreground">Friends successfully invited</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {isNonMember && (
         <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-6 mb-8 text-primary-foreground flex flex-col sm:flex-row items-center gap-4">

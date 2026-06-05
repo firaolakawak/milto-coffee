@@ -96,10 +96,16 @@ export default function Rewards() {
     }
   };
 
-  if (!accountsLoading && user && accounts.length === 0) {
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const isNonMember = !accountsLoading && user && accounts.length === 0;
+
+  if (showJoinForm) {
     return (
       <JoinRewardForm
-        onJoined={() => queryClient.invalidateQueries({ queryKey: ['loyalty-account'] })}
+        onJoined={() => {
+          queryClient.invalidateQueries({ queryKey: ['loyalty-account'] });
+          setShowJoinForm(false);
+        }}
       />
     );
   }
@@ -174,6 +180,21 @@ export default function Rewards() {
       <div className="mb-6">
         <PushNotificationManager />
       </div>
+
+      {isNonMember && (
+        <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-6 mb-8 text-primary-foreground flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex-1 text-center sm:text-left">
+            <h2 className="font-heading text-lg font-bold mb-1">Join Milto Rewards</h2>
+            <p className="text-sm opacity-80">Earn Coffee Credits with every purchase and unlock exclusive perks.</p>
+          </div>
+          <Button
+            onClick={() => setShowJoinForm(true)}
+            className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full px-6 font-semibold shrink-0"
+          >
+            Join Rewards
+          </Button>
+        </div>
+      )}
 
       <h2 className="font-heading text-xl font-semibold text-primary mb-4">Membership Tiers</h2>
       <div className="grid sm:grid-cols-2 gap-4 mb-8">

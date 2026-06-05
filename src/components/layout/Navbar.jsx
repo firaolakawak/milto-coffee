@@ -37,10 +37,12 @@ export default function Navbar() {
               <Button
                 variant={pathname === link.path ? 'secondary' : 'ghost'}
                 size="sm"
-                className="text-sm font-medium"
+                className={`text-sm ${pathname === link.path ? 'font-semibold' : 'font-medium'
+                  }`}
               >
                 {link.label}
               </Button>
+
             </Link>
           ))}
         </div>
@@ -57,7 +59,7 @@ export default function Navbar() {
               )}
             </Button>
           </Link>
-          
+
           {user?.role === 'admin' && (
             <Link to="/admin" className="hidden md:block">
               <Button variant="outline" size="sm">Admin</Button>

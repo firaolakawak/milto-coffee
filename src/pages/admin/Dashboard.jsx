@@ -12,6 +12,8 @@ import StockAlerts from '@/components/admin/StockAlerts';
 import SalesTrendsChart from '@/components/admin/SalesTrendsChart';
 import LowStockTable from '@/components/admin/LowStockTable';
 import BranchPerformanceChart from '@/components/admin/BranchPerformanceChart';
+import DailyPerformanceChart from '@/components/admin/DailyPerformanceChart';
+import TimePerformanceChart from '@/components/admin/TimePerformanceChart';
 import PushNotificationBroadcast from '@/components/admin/PushNotificationBroadcast';
 
 const PAGE_SIZE = 10;
@@ -95,6 +97,8 @@ export default function Dashboard() {
       <LowStockTable />
       <SalesTrendsChart orders={orders} />
       <BranchPerformanceChart orders={orders} branches={branches} />
+      <DailyPerformanceChart orders={orders} />
+      <TimePerformanceChart orders={orders} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) =>

@@ -4,9 +4,10 @@ import webpush from 'npm:web-push@3.6.7';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
 
-    if (user?.role !== 'admin') {
+    // Allow both: admin user calling manually, OR scheduled automation (no user auth)
+    const user = await base44.auth.me().catch(() => null);
+    if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
@@ -33,6 +34,18 @@ Deno.serve(async (req) => {
     const allSubs = await base44.asServiceRole.entities.PushSubscription.list();
     const birthdaySubs = allSubs.filter(s => userIds.includes(s.created_by_id));
 
+    // Also create in-app notifications for birthday users (even if no push sub)
+    await Promise.all(
+      birthdayUsers.map(u =>
+        base44.asServiceRole.entities.Notification.create({
+          user_id: u.id,
+          title: '🎂 Happy Birthday!',
+          message: "It's your special day! Enjoy a FREE drink on us today. Show this at any Milto Coffee branch.",
+          type: 'general',
+        }).catch(() => null)
+      )
+    );
+
     const pushPayload = JSON.stringify({
       title: '🎂 Happy Birthday from Milto Coffee!',
       message: "It's your special day! Enjoy a FREE drink on us today. Show this at any branch.",
@@ -42,24 +55,32 @@ Deno.serve(async (req) => {
     let sent = 0;
     let failed = 0;
 
-    await Promise.all(
-      birthdaySubs.map(async (sub) => {
-        try {
-          await webpush.sendNotification(
-            { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } },
-            pushPayload
-          );
-          sent++;
-        } catch (err) {
-          if (err.statusCode === 410 || err.statusCode === 404) {
-            await base44.asServiceRole.entities.PushSubscription.delete(sub.id);
+    if (birthdaySubs.length > 0) {
+      await Promise.all(
+        birthdaySubs.map(async (sub) => {
+          try {
+            await webpush.sendNotification(
+              { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } },
+              pushPayload
+            );
+            sent++;
+          } catch (err) {
+            if (err.statusCode === 410 || err.statusCode === 404) {
+              await base44.asServiceRole.entities.PushSubscription.delete(sub.id);
+            }
+            failed++;
           }
-          failed++;
-        }
-      })
-    );
+        })
+      );
+    }
 
-    return Response.json({ status: 'success', count: birthdayUsers.length, sent, failed });
+    return Response.json({
+      status: 'success',
+      count: birthdayUsers.length,
+      sent,
+      failed,
+      note: birthdaySubs.length === 0 ? 'User has no push subscription registered. In-app notification sent instead.' : undefined,
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

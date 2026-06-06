@@ -133,11 +133,14 @@ export default function Profile() {
               <Label className="text-sm">Birthday</Label>
               <p className="text-xs text-muted-foreground mb-2">Used for your free birthday drink 🎂</p>
               {user?.birthday_day && user?.birthday_month ? (
-                <div className="flex items-center gap-2 bg-muted/60 rounded-lg px-4 py-2.5 border border-border">
+                <div className="flex items-center gap-2 bg-amber-50 rounded-lg px-4 py-2.5 border border-amber-200">
+                  <span className="text-lg">🎂</span>
                   <span className="text-sm font-medium text-primary">
                     {['January','February','March','April','May','June','July','August','September','October','November','December'][user.birthday_month - 1]} {user.birthday_day}
                   </span>
-                  <span className="text-xs text-muted-foreground ml-auto">🔒 Cannot be changed</span>
+                  <span className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full px-2.5 py-1">
+                    🎁 Birthday Offer Active <span className="text-amber-500">🔒</span>
+                  </span>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">

@@ -1,18 +1,38 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, ShoppingBag, Store, Clock } from 'lucide-react';
-import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DollarSign, ShoppingBag, Store, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns';
 import StockAlerts from '@/components/admin/StockAlerts';
 import SalesTrendsChart from '@/components/admin/SalesTrendsChart';
 import LowStockTable from '@/components/admin/LowStockTable';
 import BranchPerformanceChart from '@/components/admin/BranchPerformanceChart';
 import PushNotificationBroadcast from '@/components/admin/PushNotificationBroadcast';
 
+const PAGE_SIZE = 10;
+
+// Generate last 12 months for the month picker
+function getMonthOptions() {
+  const options = [];
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    options.push({ value: format(d, 'yyyy-MM'), label: format(d, 'MMMM yyyy') });
+  }
+  return options;
+}
+
 export default function Dashboard() {
-  const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: () => base44.entities.Order.list('-created_date', 100) });
+  const [dateFilter, setDateFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [page, setPage] = useState(1);
+
+  const { data: orders = [] } = useQuery({ queryKey: ['admin-orders'], queryFn: () => base44.entities.Order.list('-created_date', 500) });
   const { data: branches = [] } = useQuery({ queryKey: ['admin-branches'], queryFn: () => base44.entities.Branch.list() });
   const { data: products = [] } = useQuery({ queryKey: ['admin-products'], queryFn: () => base44.entities.Product.list() });
 
@@ -38,6 +58,31 @@ export default function Dashboard() {
     completed: 'bg-slate-100 text-slate-600',
     cancelled: 'bg-red-100 text-red-600',
   };
+
+  const monthOptions = useMemo(() => getMonthOptions(), []);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(o => {
+      const d = new Date(o.created_date);
+      if (dateFilter) {
+        const selected = new Date(dateFilter);
+        if (d.toDateString() !== selected.toDateString()) return false;
+      }
+      if (monthFilter) {
+        const [yr, mo] = monthFilter.split('-').map(Number);
+        const start = startOfMonth(new Date(yr, mo - 1));
+        const end = endOfMonth(new Date(yr, mo - 1));
+        if (!isWithinInterval(d, { start, end })) return false;
+      }
+      return true;
+    });
+  }, [orders, dateFilter, monthFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+  const pagedOrders = filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleDateFilter = (val) => { setDateFilter(val); setMonthFilter(''); setPage(1); };
+  const handleMonthFilter = (val) => { setMonthFilter(val === 'all' ? '' : val); setDateFilter(''); setPage(1); };
 
   return (
     <div className="p-6">
@@ -80,15 +125,41 @@ export default function Dashboard() {
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Recent Orders</CardTitle>
+            <div className="flex flex-col gap-3">
+              <CardTitle className="text-lg">Order History</CardTitle>
+              <div className="flex flex-wrap gap-2">
+                <Input
+                  type="date"
+                  value={dateFilter}
+                  onChange={e => handleDateFilter(e.target.value)}
+                  className="h-8 text-xs w-40"
+                />
+                <Select value={monthFilter || 'all'} onValueChange={handleMonthFilter}>
+                  <SelectTrigger className="h-8 text-xs w-40">
+                    <SelectValue placeholder="Filter by month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All months</SelectItem>
+                    {monthOptions.map(m => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {(dateFilter || monthFilter) && (
+                  <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => { setDateFilter(''); setMonthFilter(''); setPage(1); }}>
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {orders.slice(0, 8).map(order => (
+            <div className="space-y-2">
+              {pagedOrders.map(order => (
                 <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div>
                     <p className="text-sm font-medium">#{order.order_number}</p>
-                    <p className="text-xs text-muted-foreground">{order.customer_name} · {order.branch_name}</p>
+                    <p className="text-xs text-muted-foreground">{order.customer_name} · {order.branch_name} · {format(new Date(order.created_date), 'MMM d, h:mm a')}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={`${statusColors[order.status]} border-0 text-xs`}>{order.status}</Badge>
@@ -96,8 +167,23 @@ export default function Dashboard() {
                   </div>
                 </div>
               ))}
-              {orders.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No orders yet</p>}
+              {filteredOrders.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No orders found</p>}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                <span className="text-xs text-muted-foreground">{filteredOrders.length} orders · Page {page} of {totalPages}</span>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

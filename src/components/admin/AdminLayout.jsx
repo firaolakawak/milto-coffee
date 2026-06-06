@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LayoutDashboard, Store, Coffee, ClipboardList, Award, Calendar, Megaphone, ArrowLeft, Leaf, PackageSearch, Bell } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 const navItems = [
 { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -20,6 +22,13 @@ const navItems = [
 export default function AdminLayout() {
   const { pathname } = useLocation();
 
+  const { data: orders = [] } = useQuery({
+    queryKey: ['admin-orders'],
+    queryFn: () => base44.entities.Order.list('-created_date', 200),
+    refetchInterval: 15000,
+  });
+  const activeOrderCount = orders.filter(o => ['received', 'preparing', 'ready'].includes(o.status)).length;
+
   return (
     <div className="h-screen bg-background flex overflow-hidden">
       <aside className="hidden lg:flex w-64 bg-sidebar text-sidebar-foreground flex-col border-r border-sidebar-border overflow-y-auto">
@@ -34,17 +43,31 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 p-3 space-y-1 bg-[hsl(var(--primary))]">
-          {navItems.map((item) =>
-          <Link key={item.path} to={item.path}>
-              <Button
-              variant="ghost"
-              className={`w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${pathname === item.path ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}`
-              }>
-              
-                <item.icon className="h-4 w-4" /> {item.label}
-              </Button>
-            </Link>
-          )}
+          {navItems.map((item) => {
+            const isOrders = item.path === '/admin/orders';
+            return (
+              <Link key={item.path} to={item.path}>
+                <Button
+                  variant="ghost"
+                  className={`w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${pathname === item.path ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}`}
+                >
+                  <span className="relative">
+                    <item.icon className="h-4 w-4" />
+                    {isOrders && activeOrderCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                      </span>
+                    )}
+                  </span>
+                  {item.label}
+                  {isOrders && activeOrderCount > 0 && (
+                    <span className="ml-auto text-[10px] font-bold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none">{activeOrderCount}</span>
+                  )}
+                </Button>
+              </Link>
+            );
+          })}
         </nav>
         <div className="p-3 border-t border-sidebar-border">
           <Link to="/">
@@ -57,14 +80,25 @@ export default function AdminLayout() {
 
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border px-2 py-1">
         <div className="flex justify-around">
-          {navItems.slice(0, 5).map((item) =>
-          <Link key={item.path} to={item.path}>
-              <Button variant="ghost" size="sm" className={`flex-col gap-0.5 h-auto py-1.5 text-sidebar-foreground ${pathname === item.path ? 'text-sidebar-primary' : 'opacity-60'}`}>
-                <item.icon className="h-4 w-4" />
-                <span className="text-[10px]">{item.label}</span>
-              </Button>
-            </Link>
-          )}
+          {navItems.slice(0, 5).map((item) => {
+            const isOrders = item.path === '/admin/orders';
+            return (
+              <Link key={item.path} to={item.path}>
+                <Button variant="ghost" size="sm" className={`flex-col gap-0.5 h-auto py-1.5 text-sidebar-foreground ${pathname === item.path ? 'text-sidebar-primary' : 'opacity-60'}`}>
+                  <span className="relative">
+                    <item.icon className="h-4 w-4" />
+                    {isOrders && activeOrderCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-[10px]">{item.label}</span>
+                </Button>
+              </Link>
+            );
+          })}
         </div>
       </div>
 

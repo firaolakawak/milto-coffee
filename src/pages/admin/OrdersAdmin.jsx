@@ -199,7 +199,7 @@ function OrderCard({ order, onUpdateStatus, isPending }) {
 export default function OrdersAdmin() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [monthFilter, setMonthFilter] = useState('');
   const [page, setPage] = useState(1);
   const qc = useQueryClient();

@@ -37,7 +37,7 @@ export default function Navbar() {
               <Button
                 variant={pathname === link.path ? 'secondary' : 'ghost'}
                 size="sm"
-                className={`text-sm ${pathname === link.path ? 'font-semibold' : 'font-medium'
+                className={`text-sm ${pathname === link.path ? 'font-semibold' : 'font-large'
                   }`}
               >
                 {link.label}

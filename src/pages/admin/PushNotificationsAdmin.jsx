@@ -13,48 +13,14 @@ export default function PushNotificationsAdmin() {
   const sendBirthdayOffers = async () => {
     setBirthdaySending(true);
     try {
-      const now = new Date();
-      const todayMonth = now.getMonth() + 1;
-      const todayDay = now.getDate();
-
-      // Find all users with today's birthday
-      const allUsers = await base44.asServiceRole.entities.User.list();
-      const birthdayUsers = allUsers.filter(
-        u => u.birthday_month === todayMonth && u.birthday_day === todayDay
-      );
-
-      if (birthdayUsers.length === 0) {
+      const res = await base44.functions.invoke('sendBirthdayOffers', {});
+      const { count, sent } = res.data;
+      if (count === 0) {
         toast.info('No users have a birthday today.');
-        setBirthdayResult({ count: 0 });
-        return;
+      } else {
+        toast.success(`Birthday offers sent to ${sent} subscriber(s)!`);
       }
-
-      // Get push subscriptions for birthday users
-      const userIds = birthdayUsers.map(u => u.id);
-      const allSubs = await base44.asServiceRole.entities.PushSubscription.list();
-      const birthdaySubs = allSubs.filter(s => userIds.includes(s.created_by_id));
-
-      if (birthdaySubs.length === 0) {
-        toast.info(`Found ${birthdayUsers.length} birthday user(s) but none have push notifications enabled.`);
-        setBirthdayResult({ count: birthdayUsers.length, sent: 0 });
-        return;
-      }
-
-      // Send birthday push to each subscriber
-      let sent = 0;
-      for (const sub of birthdaySubs) {
-        try {
-          await base44.functions.invoke('sendPushNotifications', {
-            title: '🎂 Happy Birthday from Milto Coffee!',
-            message: "It's your special day! Enjoy a FREE drink on us today. Show this at any branch.",
-            url: '/rewards',
-          });
-          sent++;
-        } catch {}
-      }
-
-      toast.success(`Birthday offers sent to ${sent} subscriber(s)!`);
-      setBirthdayResult({ count: birthdayUsers.length, sent });
+      setBirthdayResult({ count, sent });
     } catch (err) {
       toast.error('Failed to send birthday offers.');
     } finally {

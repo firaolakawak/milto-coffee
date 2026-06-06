@@ -1,13 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, ChefHat, Coffee, Check, X, Search, Truck, ChevronDown, ChevronUp, Phone, MapPin, FileText, CreditCard } from 'lucide-react';
-import { format } from 'date-fns';
+import { Clock, ChefHat, Coffee, Check, X, Search, Truck, ChevronDown, ChevronUp, Phone, MapPin, FileText, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+
+const PAGE_SIZE = 10;
+
+function getMonthOptions() {
+  const options = [];
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    options.push({ value: format(d, 'yyyy-MM'), label: format(d, 'MMMM yyyy') });
+  }
+  return options;
+}
 
 // Delivery flow:  received → preparing → out_for_delivery → completed
 // Pickup flow:    received → preparing → ready → completed
@@ -186,7 +199,11 @@ function OrderCard({ order, onUpdateStatus, isPending }) {
 export default function OrdersAdmin() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [monthFilter, setMonthFilter] = useState('');
+  const [page, setPage] = useState(1);
   const qc = useQueryClient();
+  const monthOptions = useMemo(() => getMonthOptions(), []);
 
   const { data: orders = [] } = useQuery({
     queryKey: ['admin-orders'],
@@ -206,11 +223,32 @@ export default function OrdersAdmin() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-orders'] })
   });
 
-  const filtered = orders.filter((o) => {
-    if (statusFilter !== 'all' && o.status !== statusFilter) return false;
-    if (search && !o.order_number?.toLowerCase().includes(search.toLowerCase()) && !o.customer_name?.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const filtered = useMemo(() => {
+    return orders.filter((o) => {
+      if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+      if (search && !o.order_number?.toLowerCase().includes(search.toLowerCase()) && !o.customer_name?.toLowerCase().includes(search.toLowerCase())) return false;
+      if (dateFilter) {
+        const selected = new Date(dateFilter);
+        const d = new Date(o.created_date);
+        if (d.toDateString() !== selected.toDateString()) return false;
+      }
+      if (monthFilter) {
+        const [yr, mo] = monthFilter.split('-').map(Number);
+        const start = startOfMonth(new Date(yr, mo - 1));
+        const end = endOfMonth(new Date(yr, mo - 1));
+        if (!isWithinInterval(new Date(o.created_date), { start, end })) return false;
+      }
+      return true;
+    });
+  }, [orders, statusFilter, search, dateFilter, monthFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pagedOrders = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleDateFilter = (val) => { setDateFilter(val); setMonthFilter(''); setPage(1); };
+  const handleMonthFilter = (val) => { setMonthFilter(val === 'all' ? '' : val); setDateFilter(''); setPage(1); };
+  const handleStatusFilter = (val) => { setStatusFilter(val); setPage(1); };
+  const handleSearch = (val) => { setSearch(val); setPage(1); };
 
   const activeStatuses = ['received', 'preparing', 'ready'];
   const activeCount = orders.filter(o => activeStatuses.includes(o.status)).length;
@@ -232,12 +270,27 @@ export default function OrdersAdmin() {
         </div>
         <p className="text-sm text-muted-foreground mb-4">Manage and track all orders in real-time · Click an order to expand details</p>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search order # or customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 rounded-full" />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search order # or customer..." value={search} onChange={(e) => handleSearch(e.target.value)} className="pl-9 rounded-full" />
+            </div>
+            <Input type="date" value={dateFilter} onChange={e => handleDateFilter(e.target.value)} className="h-9 text-xs w-40" />
+            <Select value={monthFilter || 'all'} onValueChange={handleMonthFilter}>
+              <SelectTrigger className="h-9 text-xs w-40">
+                <SelectValue placeholder="Filter by month" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All months</SelectItem>
+                {monthOptions.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {(dateFilter || monthFilter) && (
+              <Button variant="ghost" size="sm" className="h-9 text-xs text-muted-foreground" onClick={() => { setDateFilter(''); setMonthFilter(''); setPage(1); }}>Clear</Button>
+            )}
           </div>
-          <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+          <Tabs value={statusFilter} onValueChange={handleStatusFilter}>
             <TabsList className="bg-transparent p-0 flex flex-wrap gap-1 h-auto">
               <TabsTrigger value="all" className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All ({orders.length})</TabsTrigger>
               {Object.entries(statusConfig).map(([key, val]) => {
@@ -261,17 +314,31 @@ export default function OrdersAdmin() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
-      <div className="space-y-3">
-        {filtered.map((order) =>
-        <OrderCard
-          key={order.id}
-          order={order}
-          onUpdateStatus={(id, status) => updateStatus.mutate({ id, status })}
-          isPending={updateStatus.isPending} />
+        <div className="space-y-3">
+          {pagedOrders.map((order) =>
+            <OrderCard
+              key={order.id}
+              order={order}
+              onUpdateStatus={(id, status) => updateStatus.mutate({ id, status })}
+              isPending={updateStatus.isPending} />
+          )}
+          {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">No orders found</p>}
+        </div>
 
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 pt-4 border-t">
+            <span className="text-xs text-muted-foreground">{filtered.length} orders · Page {page} of {totalPages}</span>
+            <div className="flex gap-1">
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         )}
-        {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">No orders found</p>}
-      </div>
       </div>
     </div>);
 

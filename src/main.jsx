@@ -18,9 +18,12 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', app
 // Register PWA Service Worker (production only)
 if ('serviceWorker' in navigator) {
   if (import.meta.env.DEV) {
-    // In dev, unregister any stale service workers to prevent caching issues
+    // In dev, aggressively unregister all service workers and clear all caches
     navigator.serviceWorker.getRegistrations().then(registrations => {
       registrations.forEach(r => r.unregister());
+    });
+    caches.keys().then(keys => {
+      keys.forEach(key => caches.delete(key));
     });
   } else {
     window.addEventListener('load', () => {

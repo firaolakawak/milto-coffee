@@ -114,12 +114,12 @@ export default function Dashboard() {
 
       {/* Push Notifications Broadcast */}
       <Card className="border-0 shadow-sm mb-6">
-        <CardHeader className="pb-3 hidden">
-          <CardTitle className="text-lg">📣 Push Notifications</CardTitle>
-        </CardHeader>
-        <CardContent className="hidden">
-          <PushNotificationBroadcast />
-        </CardContent>
+        
+
+        
+        
+
+        
       </Card>
 
       <div className="grid lg:grid-cols-2 gap-6">

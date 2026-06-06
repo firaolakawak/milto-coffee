@@ -57,7 +57,7 @@ function birthdayEmailHtml(firstName, couponCode) {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td align="center">
-                    <a href="https://milto.coffee/menu" style="display:inline-block;background:#1E4535;color:#C9A84C;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:50px;">
+                    <a href="https://miltocoffe.com/menu" style="display:inline-block;background:#1E4535;color:#C9A84C;font-size:15px;font-weight:700;text-decoration:none;padding:14px 36px;border-radius:50px;">
                       Browse Our Menu →
                     </a>
                   </td>

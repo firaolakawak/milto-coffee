@@ -1,17 +1,36 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { subDays, format, parseISO } from 'date-fns';
+import {
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  PieChart, Pie, Cell, Tooltip as PieTooltip
+} from 'recharts';
+import { subDays, format } from 'date-fns';
+
+const GREEN = 'hsl(155,38%,19%)';
+const GOLD = 'hsl(43,50%,50%)';
+const GOLD_LIGHT = 'hsl(43,35%,65%)';
+const GREEN2 = 'hsl(155,30%,35%)';
+const PIE_COLORS = [GREEN, GOLD, GREEN2, GOLD_LIGHT, 'hsl(155,20%,50%)'];
+
+const RADIAN = Math.PI / 180;
+const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
+  if (percent < 0.05) return null;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight={600}>
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
 
 export default function SalesTrendsChart({ orders }) {
-  // Build last 7 days data
+  // Last 7 days revenue data
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const date = subDays(new Date(), 6 - i);
     const dateStr = format(date, 'yyyy-MM-dd');
-    const dayOrders = orders.filter(o => {
-      const d = o.created_date ? format(new Date(o.created_date), 'yyyy-MM-dd') : '';
-      return d === dateStr;
-    });
+    const dayOrders = orders.filter(o => o.created_date ? format(new Date(o.created_date), 'yyyy-MM-dd') === dateStr : false);
     return {
       day: format(date, 'EEE'),
       revenue: dayOrders.reduce((s, o) => s + (o.total || 0), 0),
@@ -19,44 +38,38 @@ export default function SalesTrendsChart({ orders }) {
     };
   });
 
-  // Top 5 products by order count
-  const productCounts = {};
+  // Top 6 products by revenue + count for combo chart
+  const productMap = {};
   orders.forEach(o => {
     (o.items || []).forEach(item => {
       const name = item.product_name || 'Unknown';
-      productCounts[name] = (productCounts[name] || 0) + (item.quantity || 1);
+      if (!productMap[name]) productMap[name] = { revenue: 0, count: 0 };
+      productMap[name].revenue += item.total_price || 0;
+      productMap[name].count += item.quantity || 1;
     });
   });
-  const topProducts = Object.entries(productCounts)
+  const topProducts = Object.entries(productMap)
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .slice(0, 6)
+    .map(([name, d]) => ({
+      name: name.length > 13 ? name.slice(0, 13) + '…' : name,
+      revenue: d.revenue,
+      count: d.count,
+    }));
+
+  // Revenue pie by branch
+  const branchRevMap = {};
+  orders.forEach(o => {
+    const key = o.branch_name || 'Unknown';
+    branchRevMap[key] = (branchRevMap[key] || 0) + (o.total || 0);
+  });
+  const pieData = Object.entries(branchRevMap)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name, count]) => ({ name: name.length > 14 ? name.slice(0, 14) + '…' : name, count }));
+    .map(([name, value]) => ({ name, value }));
 
   return (
     <div className="grid lg:grid-cols-2 gap-6 mb-6">
-      <Card className="border-0 shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Revenue — Last 7 Days</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={last7}>
-              <defs>
-                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(155,38%,19%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(155,38%,19%)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(155,15%,88%)" />
-              <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v) => [`${v.toLocaleString()} ETB`, 'Revenue']} />
-              <Area type="monotone" dataKey="revenue" stroke="hsl(155,38%,19%)" fill="url(#revGrad)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
+      {/* Top Products — Combo bar + line */}
       <Card className="border-0 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Top Products</CardTitle>
@@ -65,15 +78,67 @@ export default function SalesTrendsChart({ orders }) {
           {topProducts.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">No order data yet</p>
           ) : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={topProducts} layout="vertical">
+            <ResponsiveContainer width="100%" height={210}>
+              <ComposedChart data={topProducts} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(155,15%,88%)" />
-                <XAxis type="number" tick={{ fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={90} />
-                <Tooltip formatter={(v) => [v, 'Sold']} />
-                <Bar dataKey="count" fill="hsl(43,50%,50%)" radius={[0, 4, 4, 0]} />
-              </BarChart>
+                <XAxis dataKey="name" tick={{ fontSize: 9 }} />
+                <YAxis yAxisId="left" tick={{ fontSize: 10 }} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} />
+                <Tooltip
+                  formatter={(v, name) => name === 'Revenue (ETB)' ? [`${v.toLocaleString()} ETB`, name] : [v, name]}
+                />
+                <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                <Bar yAxisId="left" dataKey="revenue" name="Revenue (ETB)" fill={GOLD} radius={[3, 3, 0, 0]} />
+                <Line yAxisId="right" type="monotone" dataKey="count" name="Qty Sold" stroke={GREEN} strokeWidth={2} dot={{ r: 3 }} />
+              </ComposedChart>
             </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Revenue Overview — Pie chart */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Revenue Overview</CardTitle>
+          <p className="text-xs text-muted-foreground">Branch Revenue Distribution</p>
+        </CardHeader>
+        <CardContent>
+          {pieData.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">No revenue data yet</p>
+          ) : (
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width="55%" height={180}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={80}
+                    dataKey="value"
+                    labelLine={false}
+                    label={renderCustomLabel}
+                  >
+                    {pieData.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => [`${v.toLocaleString()} ETB`]} />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Legend */}
+              <div className="flex-1 space-y-2">
+                {pieData.map((d, i) => (
+                  <div key={i} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                      <span className="text-xs truncate max-w-[90px]">{d.name}</span>
+                    </div>
+                    <span className="text-xs font-bold text-secondary whitespace-nowrap">{d.value.toLocaleString()} ETB</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

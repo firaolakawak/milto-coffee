@@ -37,32 +37,32 @@ export default function Dashboard() {
   const { data: products = [] } = useQuery({ queryKey: ['admin-products'], queryFn: () => base44.entities.Product.list() });
 
   const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
-  const activeOrders = orders.filter(o => ['received', 'preparing', 'ready'].includes(o.status));
-  const todayOrders = orders.filter(o => {
+  const activeOrders = orders.filter((o) => ['received', 'preparing', 'ready'].includes(o.status));
+  const todayOrders = orders.filter((o) => {
     const d = new Date(o.created_date);
     const today = new Date();
     return d.toDateString() === today.toDateString();
   });
 
   const stats = [
-    { title: 'Total Revenue', value: `${totalRevenue.toLocaleString()} ETB`, icon: DollarSign, color: 'text-green-600 bg-green-100' },
-    { title: 'Total Orders', value: orders.length, icon: ShoppingBag, color: 'text-blue-600 bg-blue-100' },
-    { title: 'Active Orders', value: activeOrders.length, icon: Clock, color: 'text-amber-600 bg-amber-100' },
-    { title: 'Branches', value: branches.length, icon: Store, color: 'text-violet-600 bg-violet-100' },
-  ];
+  { title: 'Total Revenue', value: `${totalRevenue.toLocaleString()} ETB`, icon: DollarSign, color: 'text-green-600 bg-green-100' },
+  { title: 'Total Orders', value: orders.length, icon: ShoppingBag, color: 'text-blue-600 bg-blue-100' },
+  { title: 'Active Orders', value: activeOrders.length, icon: Clock, color: 'text-amber-600 bg-amber-100' },
+  { title: 'Branches', value: branches.length, icon: Store, color: 'text-violet-600 bg-violet-100' }];
+
 
   const statusColors = {
     received: 'bg-blue-100 text-blue-700',
     preparing: 'bg-amber-100 text-amber-700',
     ready: 'bg-green-100 text-green-700',
     completed: 'bg-slate-100 text-slate-600',
-    cancelled: 'bg-red-100 text-red-600',
+    cancelled: 'bg-red-100 text-red-600'
   };
 
   const monthOptions = useMemo(() => getMonthOptions(), []);
 
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
+    return orders.filter((o) => {
       const d = new Date(o.created_date);
       if (dateFilter) {
         const selected = new Date(dateFilter);
@@ -81,8 +81,8 @@ export default function Dashboard() {
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
   const pagedOrders = filteredOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleDateFilter = (val) => { setDateFilter(val); setMonthFilter(''); setPage(1); };
-  const handleMonthFilter = (val) => { setMonthFilter(val === 'all' ? '' : val); setDateFilter(''); setPage(1); };
+  const handleDateFilter = (val) => {setDateFilter(val);setMonthFilter('');setPage(1);};
+  const handleMonthFilter = (val) => {setMonthFilter(val === 'all' ? '' : val);setDateFilter('');setPage(1);};
 
   return (
     <div className="p-6">
@@ -97,8 +97,8 @@ export default function Dashboard() {
       <BranchPerformanceChart orders={orders} branches={branches} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map(stat => (
-          <Card key={stat.title} className="border-0 shadow-sm">
+        {stats.map((stat) =>
+        <Card key={stat.title} className="border-0 shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-muted-foreground">{stat.title}</span>
@@ -109,15 +109,15 @@ export default function Dashboard() {
               <p className="text-2xl font-bold">{stat.value}</p>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
 
       {/* Push Notifications Broadcast */}
       <Card className="border-0 shadow-sm mb-6">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 hidden">
           <CardTitle className="text-lg">📣 Push Notifications</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="hidden">
           <PushNotificationBroadcast />
         </CardContent>
       </Card>
@@ -131,32 +131,32 @@ export default function Dashboard() {
                 <Input
                   type="date"
                   value={dateFilter}
-                  onChange={e => handleDateFilter(e.target.value)}
-                  className="h-8 text-xs w-40"
-                />
+                  onChange={(e) => handleDateFilter(e.target.value)}
+                  className="h-8 text-xs w-40" />
+                
                 <Select value={monthFilter || 'all'} onValueChange={handleMonthFilter}>
                   <SelectTrigger className="h-8 text-xs w-40">
                     <SelectValue placeholder="Filter by month" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All months</SelectItem>
-                    {monthOptions.map(m => (
-                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                    ))}
+                    {monthOptions.map((m) =>
+                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
-                {(dateFilter || monthFilter) && (
-                  <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => { setDateFilter(''); setMonthFilter(''); setPage(1); }}>
+                {(dateFilter || monthFilter) &&
+                <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground" onClick={() => {setDateFilter('');setMonthFilter('');setPage(1);}}>
                     Clear
                   </Button>
-                )}
+                }
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {pagedOrders.map(order => (
-                <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
+              {pagedOrders.map((order) =>
+              <div key={order.id} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div>
                     <p className="text-sm font-medium">#{order.order_number}</p>
                     <p className="text-xs text-muted-foreground">{order.customer_name} · {order.branch_name} · {format(new Date(order.created_date), 'MMM d, h:mm a')}</p>
@@ -166,24 +166,24 @@ export default function Dashboard() {
                     <span className="text-sm font-semibold">{order.total} ETB</span>
                   </div>
                 </div>
-              ))}
+              )}
               {filteredOrders.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No orders found</p>}
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 pt-3 border-t">
+            {totalPages > 1 &&
+            <div className="flex items-center justify-between mt-4 pt-3 border-t">
                 <span className="text-xs text-muted-foreground">{filteredOrders.length} orders · Page {page} of {totalPages}</span>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)}>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-            )}
+            }
           </CardContent>
         </Card>
 
@@ -203,16 +203,16 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <span className="text-sm">Active Products</span>
-                <span className="font-bold">{products.filter(p => p.is_available !== false).length}</span>
+                <span className="font-bold">{products.filter((p) => p.is_available !== false).length}</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <span className="text-sm">Active Branches</span>
-                <span className="font-bold">{branches.filter(b => b.is_active !== false).length}</span>
+                <span className="font-bold">{branches.filter((b) => b.is_active !== false).length}</span>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>);
+
 }

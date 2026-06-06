@@ -212,33 +212,55 @@ export default function OrdersAdmin() {
     return true;
   });
 
+  const activeStatuses = ['received', 'preparing', 'ready'];
+  const activeCount = orders.filter(o => activeStatuses.includes(o.status)).length;
+
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-primary">Orders</h1>
-        <p className="text-sm text-muted-foreground">Manage and track all orders in real-time · Click an order to expand details</p>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search order # or customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 rounded-full" />
+    <div className="flex flex-col h-full">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 bg-background border-b px-6 pt-6 pb-4 shrink-0">
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="font-display text-2xl font-bold text-primary">Orders</h1>
+          {activeCount > 0 && (
+            <span className="relative flex h-5 w-5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+              <span className="relative inline-flex items-center justify-center rounded-full h-5 w-5 bg-red-600 text-white text-[10px] font-bold">
+                {activeCount}
+              </span>
+            </span>
+          )}
         </div>
-        <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-          <TabsList className="bg-transparent p-0 flex flex-wrap gap-1 h-auto">
-            <TabsTrigger value="all" className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All ({orders.length})</TabsTrigger>
-            {Object.entries(statusConfig).map(([key, val]) => {
-              const count = orders.filter((o) => o.status === key).length;
-              return (
-                <TabsTrigger key={key} value={key} className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  {val.label}{count > 0 ? ` (${count})` : ''}
-                </TabsTrigger>);
+        <p className="text-sm text-muted-foreground mb-4">Manage and track all orders in real-time · Click an order to expand details</p>
 
-            })}
-          </TabsList>
-        </Tabs>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search order # or customer..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 rounded-full" />
+          </div>
+          <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+            <TabsList className="bg-transparent p-0 flex flex-wrap gap-1 h-auto">
+              <TabsTrigger value="all" className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All ({orders.length})</TabsTrigger>
+              {Object.entries(statusConfig).map(([key, val]) => {
+                const count = orders.filter((o) => o.status === key).length;
+                const isActive = activeStatuses.includes(key);
+                return (
+                  <TabsTrigger key={key} value={key} className="relative rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                    {val.label}{count > 0 ? ` (${count})` : ''}
+                    {isActive && count > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+                      </span>
+                    )}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
+      <div className="flex-1 overflow-y-auto p-6">
       <div className="space-y-3">
         {filtered.map((order) =>
         <OrderCard
@@ -249,6 +271,7 @@ export default function OrdersAdmin() {
 
         )}
         {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">No orders found</p>}
+      </div>
       </div>
     </div>);
 

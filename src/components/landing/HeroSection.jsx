@@ -11,7 +11,7 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 opacity-20"
         style={{
-          backgroundImage: 'url(https://images.adsttc.com/media/images/5a27/1f54/b22e/38ce/d100/0190/large_jpg/171017__-__Standard_69_ph_G_Viramonte-0033.jpg?1512513358)',
+          backgroundImage: 'url(https://images.unsplash.com/photo-1447933601403-0c6688de566e)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

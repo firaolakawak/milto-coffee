@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/AuthContext';
 import NotificationBell from '@/components/layout/NotificationBell';
 
 const navLinks = [
-  { label: 'Menu', path: '/menu' },
+  { label: 'Order', path: '/order' },
   { label: 'Origins', path: '/origins' },
   { label: 'Stores', path: '/stores' },
   { label: 'Rewards', path: '/rewards' },
@@ -49,7 +49,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           <NotificationBell user={user} />
-          <Link to="/cart" className="relative">
+          <Link to="/order" className="relative">
             <Button variant="ghost" size="icon">
               <ShoppingCart className="h-5 w-5" />
               {itemCount > 0 && (

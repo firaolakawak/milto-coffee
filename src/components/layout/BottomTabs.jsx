@@ -5,7 +5,7 @@ import { useTabsContext } from '@/lib/TabsContext';
 
 const TABS = [
   { label: 'Home',   path: '/',        icon: Home },
-  { label: 'Menu',   path: '/menu',    icon: UtensilsCrossed },
+  { label: 'Order',  path: '/order',   icon: UtensilsCrossed },
   { label: 'Orders', path: '/orders',  icon: ShoppingBag },
   { label: 'Profile',path: '/profile', icon: User },
 ];

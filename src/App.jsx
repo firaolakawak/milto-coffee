@@ -22,6 +22,7 @@ const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'));
 const Home = React.lazy(() => import('@/pages/Home'));
 const Menu = React.lazy(() => import('@/pages/Menu'));
 const Cart = React.lazy(() => import('./pages/Cart'));
+const Order = React.lazy(() => import('./pages/Order'));
 const Orders = React.lazy(() => import('@/pages/Orders'));
 const OrderTracking = React.lazy(() => import('@/pages/OrderTracking'));
 const Origins = React.lazy(() => import('@/pages/Origins'));
@@ -119,6 +120,7 @@ const AuthenticatedApp = () => {
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route element={<AppLayout />}>
             <Route path="/cart" element={<Suspense fallback={<PageLoader />}><Cart /></Suspense>} />
+            <Route path="/order" element={<Suspense fallback={<PageLoader />}><Order /></Suspense>} />
             <Route path="/orders" element={<Suspense fallback={<PageLoader />}><Orders /></Suspense>} />
             <Route path="/orders/track/:orderId" element={<Suspense fallback={<PageLoader />}><OrderTracking /></Suspense>} />
             <Route path="/rewards" element={<Suspense fallback={<PageLoader />}><Rewards /></Suspense>} />

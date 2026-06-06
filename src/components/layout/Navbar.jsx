@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/AuthContext';
 import NotificationBell from '@/components/layout/NotificationBell';
 
 const navLinks = [
-  { label: 'Order', path: '/order' },
+  { label: 'Menu', path: '/order' },
   { label: 'Origins', path: '/origins' },
   { label: 'Stores', path: '/stores' },
   { label: 'Rewards', path: '/rewards' },

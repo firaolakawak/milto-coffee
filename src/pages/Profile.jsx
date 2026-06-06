@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Settings, ShoppingBag, Coins, Star, CreditCard, Trash2, Copy, Check } from 'lucide-react';
+import { LogOut, Settings, ShoppingBag, Coins, Star, Trash2, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -18,14 +18,14 @@ import {
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import LoyaltyCard from '@/components/profile/LoyaltyCard';
 import OrderHistoryList from '@/components/profile/OrderHistoryList';
-import PaymentHistoryList from '@/components/profile/PaymentHistoryList';
+import PointsHistoryList from '@/components/profile/PointsHistoryList';
 import RedeemedCoinsList from '@/components/profile/RedeemedCoinsList';
 
 const TABS = [
   { id: 'orders',   label: 'Orders',   icon: ShoppingBag },
   { id: 'loyalty',  label: 'Loyalty',  icon: Star },
   { id: 'coins',    label: 'Redeemed', icon: Coins },
-  { id: 'payments', label: 'Payments', icon: CreditCard },
+  { id: 'payments', label: 'Points', icon: Star },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -118,7 +118,7 @@ export default function Profile() {
 
       {activeTab === 'coins' && <RedeemedCoinsList orders={orders} />}
 
-      {activeTab === 'payments' && <PaymentHistoryList orders={orders} />}
+      {activeTab === 'payments' && <PointsHistoryList orders={orders} />}
 
       {activeTab === 'settings' && (
         <Card className="border-0 shadow-sm">

@@ -11,6 +11,7 @@ const PRESETS = [
   { label: '🎉 New on Menu', title: 'New Arrival at Milto Coffee ✨', message: 'A new coffee just landed on our menu. Be the first to try it!', url: '/menu' },
   { label: '🏷️ Flash Discount', title: 'Flash Offer — Limited Time!', message: 'Get 20% off your next order today only. Don\'t miss it!', url: '/menu' },
   { label: '📅 Upcoming Event', title: 'Join Us at Milto Coffee ☕', message: 'We have an exciting event coming up. Save your spot now!', url: '/events' },
+  { label: '🎂 Birthday Offer', title: 'Happy Birthday from Milto Coffee! 🎂', message: 'It\'s your special day! Enjoy a FREE drink on us today. Visit any branch and show this notification.', url: '/rewards' },
 ];
 
 export default function PushNotificationBroadcast() {

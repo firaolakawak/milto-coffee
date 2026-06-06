@@ -122,7 +122,7 @@ export default function PushNotificationsAdmin() {
                 const couponCode = `BDAY-${u.id.slice(-6).toUpperCase()}`;
                 const phone = u.phone.replace(/[^0-9]/g, '');
                 const message = encodeURIComponent(
-                  `🎂 Happy Birthday, ${firstName}! 🎉\n\nWishing you a wonderful day from all of us at Milto Coffee! ☕\n\nAs a birthday gift, enjoy a FREE drink today using your exclusive coupon:\n\n*${couponCode}*\n\nShow this message to your barista at any Milto Coffee branch. Valid today only! 🎁`
+                  `✨ Happy Birthday, ${firstName}! ✨\nThe Milto Coffee family is celebrating you today.\n\n🎁 Enjoy a FREE DRINK on us!\nYour exclusive code: ${couponCode}\n\nShow this message at any Milto Coffee branch.\n☕ Menu: https://miltocoffee.com/menu`
                 );
                 const waUrl = `https://wa.me/${phone}?text=${message}`;
                 return (

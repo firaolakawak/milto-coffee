@@ -21,7 +21,7 @@ const ForgotPassword = React.lazy(() => import('@/pages/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'));
 const Home = React.lazy(() => import('@/pages/Home'));
 const Menu = React.lazy(() => import('@/pages/Menu'));
-const Cart = React.lazy(() => import('@/pages/Cart'));
+const Cart = React.lazy(() => import('./pages/Cart'));
 const Orders = React.lazy(() => import('@/pages/Orders'));
 const OrderTracking = React.lazy(() => import('@/pages/OrderTracking'));
 const Origins = React.lazy(() => import('@/pages/Origins'));

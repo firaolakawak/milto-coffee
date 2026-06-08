@@ -11,6 +11,8 @@ import { Clock, ChefHat, Coffee, Check, X, Search, Truck, ChevronDown, ChevronUp
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 
 const PAGE_SIZE = 10;
+const TODAY = format(new Date(), 'yyyy-MM-dd');
+const activeStatuses = ['received', 'preparing', 'ready', 'out_for_delivery'];
 
 function getMonthOptions() {
   const options = [];
@@ -197,9 +199,9 @@ function OrderCard({ order, onUpdateStatus, isPending }) {
 }
 
 export default function OrdersAdmin() {
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('active');
   const [search, setSearch] = useState('');
-  const [dateFilter, setDateFilter] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [dateFilter, setDateFilter] = useState(TODAY);
   const [monthFilter, setMonthFilter] = useState('');
   const [page, setPage] = useState(1);
   const qc = useQueryClient();
@@ -225,7 +227,9 @@ export default function OrdersAdmin() {
 
   const filtered = useMemo(() => {
     return orders.filter((o) => {
-      if (statusFilter !== 'all' && o.status !== statusFilter) return false;
+      // "active" tab shows only active statuses
+      if (statusFilter === 'active' && !activeStatuses.includes(o.status)) return false;
+      if (statusFilter !== 'all' && statusFilter !== 'active' && o.status !== statusFilter) return false;
       if (search && !o.order_number?.toLowerCase().includes(search.toLowerCase()) && !o.customer_name?.toLowerCase().includes(search.toLowerCase())) return false;
       if (dateFilter) {
         const selected = new Date(dateFilter);
@@ -247,10 +251,20 @@ export default function OrdersAdmin() {
 
   const handleDateFilter = (val) => { setDateFilter(val); setMonthFilter(''); setPage(1); };
   const handleMonthFilter = (val) => { setMonthFilter(val === 'all' ? '' : val); setDateFilter(''); setPage(1); };
-  const handleStatusFilter = (val) => { setStatusFilter(val); setPage(1); };
+  const handleStatusFilter = (val) => {
+    setStatusFilter(val);
+    setPage(1);
+    // Active tab: lock to today. History tabs: clear date so all history shows
+    if (val === 'active') {
+      setDateFilter(TODAY);
+      setMonthFilter('');
+    } else {
+      setDateFilter('');
+      setMonthFilter('');
+    }
+  };
   const handleSearch = (val) => { setSearch(val); setPage(1); };
 
-  const activeStatuses = ['received', 'preparing', 'ready'];
   const activeCount = orders.filter(o => activeStatuses.includes(o.status)).length;
 
   return (
@@ -292,19 +306,21 @@ export default function OrdersAdmin() {
           </div>
           <Tabs value={statusFilter} onValueChange={handleStatusFilter}>
             <TabsList className="bg-transparent p-0 flex flex-wrap gap-1 h-auto">
-              <TabsTrigger value="all" className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All ({orders.length})</TabsTrigger>
+              <TabsTrigger value="active" className="relative rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Current Orders{activeCount > 0 ? ` (${activeCount})` : ''}
+                {activeCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="all" className="rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">All</TabsTrigger>
               {Object.entries(statusConfig).map(([key, val]) => {
                 const count = orders.filter((o) => o.status === key).length;
-                const isActive = activeStatuses.includes(key);
                 return (
                   <TabsTrigger key={key} value={key} className="relative rounded-full text-xs px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                     {val.label}{count > 0 ? ` (${count})` : ''}
-                    {isActive && count > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
-                      </span>
-                    )}
                   </TabsTrigger>
                 );
               })}

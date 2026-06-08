@@ -125,7 +125,13 @@ export default function Profile() {
           <CardContent className="p-6 space-y-4">
             <div>
               <Label className="text-sm">Phone Number</Label>
-              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+251 9XX XXX XXX" className="mt-1" />
+              <Input
+                value={phone}
+                onChange={e => setPhone(e.target.value.replace(/[^\d+\s\-]/g, ''))}
+                placeholder="+251 9XX XXX XXX"
+                className="mt-1"
+                type="tel"
+              />
             </div>
 
             {/* Birthday */}

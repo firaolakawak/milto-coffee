@@ -24,10 +24,25 @@ export default function PhoneRegistrationModal({ open, onComplete }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const handlePhoneChange = (e) => {
+    // Only allow +, digits, spaces, and dashes
+    const val = e.target.value.replace(/[^\d+\s\-]/g, '');
+    setPhone(val);
+  };
+
+  const validatePhone = (p) => {
+    const digits = p.replace(/\D/g, '');
+    return digits.length >= 9 && digits.length <= 15;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!phone.trim()) {
       setError('Phone number is required');
+      return;
+    }
+    if (!validatePhone(phone)) {
+      setError('Please enter a valid phone number (9–15 digits)');
       return;
     }
     
@@ -75,7 +90,7 @@ export default function PhoneRegistrationModal({ open, onComplete }) {
                 type="tel"
                 placeholder="+971 50 123 4567"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={handlePhoneChange}
                 className="pl-10"
                 autoFocus
                 required

@@ -19,7 +19,28 @@ const MILK_OPTIONS = [
   { label: 'Almond', icon: '🌰' },
   { label: 'None', icon: '🚫' },
 ];
+function ShortTagline({ text }) {
+  const words = text.split(" ");
+  const isLong = words.length > MAX_WORDS;
+  const shortText = isLong ? words.slice(0, MAX_WORDS).join(" ") + "..." : text;
 
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <p className="text-sm text-foreground/70 mt-1 leading-snug">
+      {expanded ? text : shortText}
+
+      {isLong && !expanded && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="ml-1 text-primary font-medium hover:underline"
+        >
+          See more...
+        </button>
+      )}
+    </p>
+  );
+}
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
 const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 

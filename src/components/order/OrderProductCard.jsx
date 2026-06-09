@@ -159,7 +159,7 @@ export default function OrderProductCard({ group, onAdded }) {
           onClick={() => setShowDetails(v => !v)}
           className="flex items-center gap-1 text-sm text-primary underline underline-offset-2 mt-1.5 font-medium hover:text-primary/80 transition-colors"
         >
-          {showDetails ? 'Hide details' : 'See more...'}
+          {showDetails ? 'Hide details' : ''}
           <ChevronRight
             className={`h-3.5 w-3.5 transition-transform ${showDetails ? 'rotate-90' : ''}`}
           />

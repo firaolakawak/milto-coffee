@@ -256,7 +256,7 @@ export default function OrderProductCard({ group, onAdded }) {
                         onClick={() => setMilk(label)}
                         style={{ minHeight: 44 }}
                         className={`
-                            flex items-center gap-1.5 py-2 rounded-2xl border-2 transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-xs font-semibold px-4
+                            flex items-center gap-1.5 rounded-2xl border-2 transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-xs font-semibold px-4 py-2
                             ${
                         sel ?
                         'bg-secondary text-secondary-foreground border-secondary shadow-sm' :

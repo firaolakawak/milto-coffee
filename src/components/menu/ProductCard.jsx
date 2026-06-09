@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Minus, ShoppingCart } from 'lucide-react';
+import { Plus, Minus, Check, ChevronRight } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { toast } from 'sonner';
 
@@ -14,15 +13,22 @@ const SIZES = [
   { name: 'Large', price_modifier: 15 },
 ];
 
-const MILK_OPTIONS = ['Whole', 'Skim', 'Oat', 'Almond', 'None'];
+const MILK_OPTIONS = [
+  { label: 'Whole', icon: '🐄' },
+  { label: 'Skim', icon: '🥛' },
+  { label: 'Oat', icon: '🌾' },
+  { label: 'Almond', icon: '🌰' },
+  { label: 'None', icon: '🚫' },
+];
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
 const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 
-// Categories that get full customizations (size + milk + sugar + roast)
 const FULL_CUSTOM_CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'specialty'];
-// Categories that get size only
 const SIZE_ONLY_CATEGORIES = ['traditional', 'cold_brew'];
-// Categories with no customizations: pastries, snacks, beans
+
+function SectionDivider() {
+  return <div className="border-t border-border" />;
+}
 
 export default function ProductCard({ group }) {
   const [open, setOpen] = useState(false);
@@ -37,8 +43,6 @@ export default function ProductCard({ group }) {
   const products = group.products;
   const primaryProduct = products[0];
   const isGrouped = products.length > 1;
-
-  // The currently active product in the dialog
   const activeProduct = products.find(p => p.id === activeProductId) || primaryProduct;
 
   const hasFullCustomizations = FULL_CUSTOM_CATEGORIES.includes(activeProduct.category);
@@ -46,12 +50,13 @@ export default function ProductCard({ group }) {
   const hasSize = hasFullCustomizations || hasSizeOnly;
   const sizeData = hasSize ? SIZES.find(s => s.name === size) : null;
   const unitPrice = activeProduct.price + (sizeData?.price_modifier || 0);
+  const totalPrice = unitPrice * quantity;
 
-  // Price display on the card: show range if variants differ in price
   const prices = products.map(p => p.price);
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
   const priceLabel = minPrice === maxPrice ? `${minPrice} ETB` : `${minPrice}–${maxPrice} ETB`;
+  const cardImage = products.find(p => p.image_url)?.image_url;
 
   const handleOpen = () => {
     setActiveProductId(primaryProduct.id);
@@ -63,15 +68,6 @@ export default function ProductCard({ group }) {
     setOpen(true);
   };
 
-  const handleTabChange = (productId) => {
-    setActiveProductId(productId);
-    setSize('Medium');
-    setMilk('Whole');
-    setSugar('Regular');
-    setRoast('Regular');
-    setQuantity(1);
-  };
-
   const handleAdd = () => {
     const customizations = hasFullCustomizations ? { milk, sugar, roast } : {};
     addItem({ ...activeProduct, sizes: hasSize ? SIZES : [] }, quantity, hasSize ? size : null, customizations);
@@ -79,9 +75,6 @@ export default function ProductCard({ group }) {
     setOpen(false);
     setQuantity(1);
   };
-
-  // Image from the first product that has one
-  const cardImage = products.find(p => p.image_url)?.image_url;
 
   return (
     <>
@@ -91,23 +84,16 @@ export default function ProductCard({ group }) {
       >
         <div className="h-40 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center overflow-hidden relative">
           {cardImage ? (
-            <img
-              src={cardImage}
-              alt={group.baseName}
+            <img src={cardImage} alt={group.baseName}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
-            />
+              onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
           ) : null}
-          <span
-            className="text-5xl opacity-60 absolute inset-0 flex items-center justify-center"
-            style={{ display: cardImage ? 'none' : 'flex' }}
-          >☕</span>
+          <span className="text-5xl opacity-60 absolute inset-0 flex items-center justify-center"
+            style={{ display: cardImage ? 'none' : 'flex' }}>☕</span>
         </div>
         <CardContent className="p-4">
           <h3 className="font-semibold text-primary text-sm">{group.baseName}</h3>
-          {isGrouped && (
-            <p className="text-xs text-muted-foreground mt-0.5">{products.length} variants</p>
-          )}
+          {isGrouped && <p className="text-xs text-muted-foreground mt-0.5">{products.length} variants</p>}
           {!isGrouped && primaryProduct.description && (
             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{primaryProduct.description}</p>
           )}
@@ -121,116 +107,165 @@ export default function ProductCard({ group }) {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-display text-xl">{group.baseName}</DialogTitle>
-          </DialogHeader>
-
-          {/* Variant Tabs */}
-          {isGrouped && (
-            <div className="mb-2">
-              <Label className="text-sm font-medium mb-2 block">Choose Variant</Label>
-              <Tabs value={activeProduct.id} onValueChange={handleTabChange}>
-                <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 rounded-xl">
-                  {products.map(p => (
-                    <TabsTrigger
-                      key={p.id}
-                      value={p.id}
-                      className="rounded-lg text-xs px-3 py-1.5 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
-                    >
-                      {p.variantName}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl max-h-[92vh] flex flex-col">
+          {/* Header: image + title */}
+          <div className="flex gap-4 p-5 pb-4 items-start">
+            <div className="w-24 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/10 flex-shrink-0 flex items-center justify-center">
+              {cardImage ? (
+                <img src={cardImage} alt={activeProduct.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-4xl">☕</span>
+              )}
             </div>
-          )}
+            <div className="flex-1 pt-1">
+              <h2 className="font-display text-xl font-semibold text-primary leading-tight">{activeProduct.name}</h2>
+              {activeProduct.description && (
+                <p className="text-sm text-muted-foreground mt-1">{activeProduct.description}</p>
+              )}
+              {isGrouped && (
+                <div className="mt-2">
+                  <Tabs value={activeProduct.id} onValueChange={id => { setActiveProductId(id); setSize('Medium'); }}>
+                    <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 rounded-xl">
+                      {products.map(p => (
+                        <TabsTrigger key={p.id} value={p.id}
+                          className="rounded-lg text-xs px-3 py-1.5 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">
+                          {p.variantName}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                </div>
+              )}
+              <button className="flex items-center gap-0.5 text-xs text-primary underline mt-1.5 font-medium">
+                More details <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
 
-          <div className="space-y-5">
-            {activeProduct.description && (
-              <p className="text-sm text-muted-foreground">{activeProduct.description}</p>
-            )}
+          {/* Scrollable options */}
+          <div className="overflow-y-auto flex-1">
+            <div className="px-5 space-y-0">
 
-            {hasSize && (
-              <div>
-                <Label className="text-sm font-medium mb-2 block">Size</Label>
-                <div className="flex gap-2">
-                  {SIZES.map(s => (
-                    <button
-                      key={s.name}
-                      onClick={() => setSize(s.name)}
-                      className={`flex-1 py-2 px-3 rounded-full text-sm font-medium border transition-all ${size === s.name ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
-                    >
-                      {s.name}<br />
-                      <span className="text-xs opacity-75">{s.price_modifier >= 0 ? '+' : ''}{s.price_modifier} ETB</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {hasFullCustomizations && (
-              <>
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Milk</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {MILK_OPTIONS.map(m => (
-                      <button
-                        key={m}
-                        onClick={() => setMilk(m)}
-                        className={`py-1.5 px-3 rounded-full text-sm border transition-all ${milk === m ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
-                      >
-                        {m}
-                      </button>
-                    ))}
+              {/* SIZE */}
+              {hasSize && (
+                <>
+                  <SectionDivider />
+                  <div className="py-4">
+                    <p className="font-bold text-foreground text-base mb-3">Size</p>
+                    <div className="flex gap-2">
+                      {SIZES.map(s => {
+                        const selected = size === s.name;
+                        const label = s.price_modifier === 0
+                          ? `${s.name} (Base)`
+                          : `${s.name} (${s.price_modifier > 0 ? '+' : ''}${s.price_modifier} ETB)`;
+                        return (
+                          <button key={s.name} onClick={() => setSize(s.name)}
+                            className={`flex-1 py-2.5 px-2 rounded-xl text-sm font-medium border-2 transition-all relative flex flex-col items-center gap-0.5
+                              ${selected
+                                ? 'bg-secondary text-secondary-foreground border-secondary'
+                                : 'bg-transparent border-border text-foreground hover:border-secondary/60'}`}>
+                            <span>{label}</span>
+                            {selected && <Check className="h-3.5 w-3.5 absolute bottom-1.5" />}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Sugar</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {SUGAR_OPTIONS.map(s => (
-                      <button
-                        key={s}
-                        onClick={() => setSugar(s)}
-                        className={`py-1.5 px-3 rounded-full text-sm border transition-all ${sugar === s ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Roast</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {ROAST_OPTIONS.map(r => (
-                      <button
-                        key={r}
-                        onClick={() => setRoast(r)}
-                        className={`py-1.5 px-3 rounded-full text-sm border transition-all ${roast === r ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
-                      >
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            <div className="flex items-center justify-between">
+              {/* MILK */}
+              {hasFullCustomizations && (
+                <>
+                  <SectionDivider />
+                  <div className="py-4">
+                    <p className="font-bold text-foreground text-base mb-3">Milk</p>
+                    <div className="flex flex-wrap gap-2">
+                      {MILK_OPTIONS.map(({ label, icon }) => {
+                        const selected = milk === label;
+                        return (
+                          <button key={label} onClick={() => setMilk(label)}
+                            className={`flex items-center gap-1.5 py-2 px-3 rounded-xl text-sm border-2 transition-all font-medium
+                              ${selected
+                                ? 'bg-secondary text-secondary-foreground border-secondary'
+                                : 'bg-transparent border-border text-foreground hover:border-secondary/60'}`}>
+                            <span>{icon}</span>
+                            <span>{label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <SectionDivider />
+                  <div className="py-4">
+                    <p className="font-bold text-foreground text-base mb-3">Sugar</p>
+                    <div className="flex flex-wrap gap-2">
+                      {SUGAR_OPTIONS.map(s => {
+                        const selected = sugar === s;
+                        return (
+                          <button key={s} onClick={() => setSugar(s)}
+                            className={`flex items-center gap-1 py-2 px-4 rounded-xl text-sm border-2 transition-all font-medium
+                              ${selected
+                                ? 'bg-secondary text-secondary-foreground border-secondary'
+                                : 'bg-transparent border-border text-foreground hover:border-secondary/60'}`}>
+                            {selected && <Check className="h-3.5 w-3.5" />}
+                            <span>{s}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">Adjust sweetness level.</p>
+                  </div>
+
+                  <SectionDivider />
+                  <div className="py-4">
+                    <p className="font-bold text-foreground text-base mb-3">Roast</p>
+                    <div className="flex flex-wrap gap-2">
+                      {ROAST_OPTIONS.map(r => {
+                        const selected = roast === r;
+                        return (
+                          <button key={r} onClick={() => setRoast(r)}
+                            className={`flex items-center gap-1 py-2 px-5 rounded-xl text-sm border-2 transition-all font-medium
+                              ${selected
+                                ? 'bg-secondary text-secondary-foreground border-secondary'
+                                : 'bg-transparent border-border text-foreground hover:border-secondary/60'}`}>
+                            {selected && <Check className="h-3.5 w-3.5" />}
+                            <span>{r}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">Choose coffee intensity.</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom: quantity + total + CTA */}
+          <div className="px-5 pt-3 pb-5 border-t border-border bg-background">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <span className="font-semibold w-6 text-center">{quantity}</span>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setQuantity(quantity + 1)}>
-                  <Plus className="h-3 w-3" />
-                </Button>
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="h-9 w-9 rounded-full border-2 border-border flex items-center justify-center hover:border-secondary transition-colors">
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="font-bold text-lg w-6 text-center">{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)}
+                  className="h-9 w-9 rounded-full border-2 border-border flex items-center justify-center hover:border-secondary transition-colors">
+                  <Plus className="h-4 w-4" />
+                </button>
               </div>
-              <span className="text-lg font-bold text-secondary">{unitPrice * quantity} ETB</span>
+              <div className="text-right">
+                <span className="text-muted-foreground text-sm font-medium">Total: </span>
+                <span className="text-xl font-bold text-foreground">{totalPrice} ETB</span>
+              </div>
             </div>
-
-            <Button onClick={handleAdd} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full">
-              <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-            </Button>
+            <button onClick={handleAdd}
+              className="w-full bg-primary text-primary-foreground py-4 rounded-2xl text-base font-bold hover:bg-primary/90 transition-colors">
+              Add to Cart — {totalPrice} ETB
+            </button>
           </div>
         </DialogContent>
       </Dialog>

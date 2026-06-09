@@ -2,84 +2,45 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Minus, Check, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, Minus, Check, ChevronRight } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
 import { toast } from 'sonner';
 
 const SIZES = [
-  { name: 'Small', price_modifier: -10 },
+  { name: 'Small',  price_modifier: -10 },
   { name: 'Medium', price_modifier: 0 },
-  { name: 'Large', price_modifier: 15 },
+  { name: 'Large',  price_modifier: 15 },
 ];
 
 const MILK_OPTIONS = [
-  { label: 'Whole', icon: '🐄' },
-  { label: 'Skim',  icon: '🥛' },
-  { label: 'Oat',   icon: '🌾' },
-  { label: 'Almond',icon: '🌰' },
-  { label: 'None',  icon: '🚫' },
+  { label: 'Whole',  icon: '🐄' },
+  { label: 'Skim',   icon: '🥛' },
+  { label: 'Oat',    icon: '🌾' },
+  { label: 'Almond', icon: '🌰' },
+  { label: 'None',   icon: '🚫' },
 ];
 
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
-
-const ROAST_OPTIONS = [
-  { name: 'Light',   hint: 'Smooth, mild flavor.' },
-  { name: 'Regular', hint: 'Balanced taste.' },
-  { name: 'Dark',    hint: 'Bold, strong flavor.' },
-];
+const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 
 const FULL_CUSTOM_CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'specialty'];
 const SIZE_ONLY_CATEGORIES   = ['traditional', 'cold_brew'];
 
-function Pill({ selected, onClick, children }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{ minHeight: 44 }}
-      className={`
-        inline-flex items-center justify-center gap-1.5 px-4 rounded-xl text-sm font-medium border-2
-        transition-all duration-150 active:scale-95
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-        ${selected
-          ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
-          : 'bg-background border-border text-foreground hover:border-secondary/60 hover:bg-secondary/5'}
-      `}
-    >
-      {children}
-      {selected && <Check className="h-3.5 w-3.5 flex-shrink-0" />}
-    </button>
-  );
-}
-
-function Section({ label, hint, children }) {
-  return (
-    <>
-      <div className="border-t border-border" />
-      <div className="py-5">
-        <p className="text-base font-bold text-foreground mb-0.5">{label}</p>
-        {hint && <p className="text-xs text-muted-foreground mb-3">{hint}</p>}
-        {!hint && <div className="mb-3" />}
-        {children}
-      </div>
-    </>
-  );
-}
-
 export default function OrderProductCard({ group, onAdded }) {
-  const [open, setOpen]                   = useState(false);
+  const [open, setOpen]                       = useState(false);
   const [activeProductId, setActiveProductId] = useState(null);
-  const [size, setSize]                   = useState('Medium');
-  const [milk, setMilk]                   = useState('Whole');
-  const [sugar, setSugar]                 = useState('Regular');
-  const [roast, setRoast]                 = useState('Regular');
-  const [quantity, setQuantity]           = useState(1);
-  const [detailsOpen, setDetailsOpen]     = useState(false);
+  const [size, setSize]                       = useState('Medium');
+  const [milk, setMilk]                       = useState('Whole');
+  const [sugar, setSugar]                     = useState('Regular');
+  const [roast, setRoast]                     = useState('Regular');
+  const [quantity, setQuantity]               = useState(1);
+  const [showDetails, setShowDetails]         = useState(false);
   const { addItem } = useCart();
 
-  const products        = group.products;
-  const primaryProduct  = products[0];
-  const isGrouped       = products.length > 1;
-  const activeProduct   = products.find(p => p.id === activeProductId) || primaryProduct;
+  const products       = group.products;
+  const primaryProduct = products[0];
+  const isGrouped      = products.length > 1;
+  const activeProduct  = products.find(p => p.id === activeProductId) || primaryProduct;
 
   const hasFullCustomizations = FULL_CUSTOM_CATEGORIES.includes(activeProduct.category);
   const hasSizeOnly           = SIZE_ONLY_CATEGORIES.includes(activeProduct.category);
@@ -94,17 +55,15 @@ export default function OrderProductCard({ group, onAdded }) {
   const priceLabel = minPrice === maxPrice ? `${minPrice} ETB` : `${minPrice}–${maxPrice} ETB`;
   const cardImage  = products.find(p => p.image_url)?.image_url;
 
-  const fullDesc = activeProduct.description || '';
-  const tagline  = fullDesc.includes('.')
-    ? fullDesc.split('.')[0] + '.'
-    : fullDesc.slice(0, 60) + (fullDesc.length > 60 ? '…' : '');
-  const hasMore  = fullDesc.length > tagline.length;
+  const fullDesc  = activeProduct.description || '';
+  const tagline   = fullDesc.split('.')[0] + (fullDesc.includes('.') ? '.' : '');
+  const extraDesc = fullDesc.slice(tagline.length).trim();
 
   const handleOpen = () => {
     setActiveProductId(primaryProduct.id);
     setSize('Medium'); setMilk('Whole');
     setSugar('Regular'); setRoast('Regular');
-    setQuantity(1); setDetailsOpen(false);
+    setQuantity(1); setShowDetails(false);
     setOpen(true);
   };
 
@@ -144,35 +103,35 @@ export default function OrderProductCard({ group, onAdded }) {
         </CardContent>
       </Card>
 
-      {/* ── dialog ── */}
+      {/* ── customization dialog ── */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl max-h-[92vh] flex flex-col bg-background">
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl max-h-[92vh] flex flex-col bg-card">
 
-          {/* header */}
-          <div className="flex gap-4 p-5 pb-0 items-start">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/10 flex-shrink-0 flex items-center justify-center shadow-sm">
+          {/* ── header ── */}
+          <div className="flex gap-4 px-5 pt-5 pb-4 items-start bg-card">
+            <div className="w-[90px] h-[90px] rounded-xl overflow-hidden bg-muted flex-shrink-0 shadow-sm">
               {cardImage
                 ? <img src={cardImage} alt={activeProduct.name} className="w-full h-full object-cover" />
-                : <span className="text-4xl">☕</span>}
+                : <div className="w-full h-full flex items-center justify-center text-4xl">☕</div>}
             </div>
-            <div className="flex-1 pt-1 min-w-0">
-              <h2 className="font-display text-xl font-bold text-primary leading-tight">{activeProduct.name}</h2>
+            <div className="flex-1 pt-0.5 min-w-0">
+              <h2 className="font-display text-[22px] font-bold text-primary leading-tight">{activeProduct.name}</h2>
               {tagline && (
-                <p className="text-sm text-muted-foreground mt-1 leading-snug">{tagline}</p>
+                <p className="text-sm text-foreground/70 mt-1 leading-snug">{tagline}</p>
               )}
-              {hasMore && (
-                <button
-                  onClick={() => setDetailsOpen(v => !v)}
-                  className="flex items-center gap-0.5 text-xs text-secondary font-semibold mt-1.5 hover:underline focus-visible:outline-none"
-                >
-                  {detailsOpen ? 'Less details' : 'More details'}
-                  {detailsOpen
-                    ? <ChevronDown className="h-3 w-3" />
-                    : <ChevronRight className="h-3 w-3" />}
-                </button>
-              )}
-              {detailsOpen && (
-                <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{fullDesc}</p>
+              {extraDesc && (
+                <>
+                  <button
+                    onClick={() => setShowDetails(v => !v)}
+                    className="flex items-center gap-0.5 text-sm text-primary underline underline-offset-2 mt-1.5 font-medium hover:text-primary/80 transition-colors"
+                  >
+                    {showDetails ? 'Hide details' : 'More details'}
+                    <ChevronRight className={`h-3.5 w-3.5 transition-transform ${showDetails ? 'rotate-90' : ''}`} />
+                  </button>
+                  {showDetails && (
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{extraDesc}</p>
+                  )}
+                </>
               )}
               {isGrouped && (
                 <div className="mt-2">
@@ -191,11 +150,13 @@ export default function OrderProductCard({ group, onAdded }) {
             </div>
           </div>
 
-          {/* options */}
-          <div className="overflow-y-auto flex-1 px-5">
+          {/* ── scrollable sections ── */}
+          <div className="overflow-y-auto flex-1 bg-card">
 
+            {/* SIZE */}
             {hasSize && (
-              <Section label="Size">
+              <div className="px-5 py-4 border-t border-border">
+                <p className="text-[15px] font-bold text-foreground mb-3">Size</p>
                 <div className="flex gap-2">
                   {SIZES.map(s => {
                     const sel   = size === s.name;
@@ -208,91 +169,134 @@ export default function OrderProductCard({ group, onAdded }) {
                         onClick={() => setSize(s.name)}
                         style={{ minHeight: 52 }}
                         className={`
-                          flex-1 px-2 rounded-xl text-sm font-medium border-2
-                          transition-all duration-150 active:scale-95
-                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                          flex-1 py-3 px-2 rounded-2xl text-sm font-semibold border-2
+                          transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
                           ${sel
                             ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
-                            : 'bg-background border-border text-foreground hover:border-secondary/60 hover:bg-secondary/5'}
+                            : 'bg-background border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'}
                         `}
                       >
-                        {label}
+                        <span className="block">{label}</span>
+                        {sel && <Check className="h-3.5 w-3.5 mx-auto mt-1 opacity-90" />}
                       </button>
                     );
                   })}
                 </div>
-              </Section>
+              </div>
             )}
 
+            {/* MILK */}
             {hasFullCustomizations && (
               <>
-                <Section label="Milk">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {MILK_OPTIONS.slice(0, 3).map(({ label, icon }) => (
-                      <Pill key={label} selected={milk === label} onClick={() => setMilk(label)}>
-                        <span>{icon}</span><span>{label}</span>
-                      </Pill>
-                    ))}
-                  </div>
+                <div className="px-5 py-4 border-t border-border">
+                  <p className="text-[15px] font-bold text-foreground mb-3">Milk</p>
                   <div className="flex flex-wrap gap-2">
-                    {MILK_OPTIONS.slice(3).map(({ label, icon }) => (
-                      <Pill key={label} selected={milk === label} onClick={() => setMilk(label)}>
-                        <span>{icon}</span><span>{label}</span>
-                      </Pill>
-                    ))}
+                    {MILK_OPTIONS.map(({ label, icon }) => {
+                      const sel = milk === label;
+                      return (
+                        <button
+                          key={label}
+                          onClick={() => setMilk(label)}
+                          style={{ minHeight: 44 }}
+                          className={`
+                            flex items-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-medium border-2
+                            transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                            ${sel
+                              ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
+                              : 'bg-background border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'}
+                          `}
+                        >
+                          <span className="text-base leading-none">{icon}</span>
+                          <span>{label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                   {milk === 'None' && (
                     <p className="text-xs text-muted-foreground mt-2 italic">No milk will be added.</p>
                   )}
-                </Section>
+                </div>
 
-                <Section label="Sugar" hint="Adjust sweetness level.">
-                  <div className="flex flex-wrap gap-2">
-                    {SUGAR_OPTIONS.map(s => (
-                      <Pill key={s} selected={sugar === s} onClick={() => setSugar(s)}>{s}</Pill>
-                    ))}
+                {/* SUGAR */}
+                <div className="px-5 py-4 border-t border-border">
+                  <p className="text-[15px] font-bold text-foreground mb-1">Sugar</p>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {SUGAR_OPTIONS.map(s => {
+                      const sel = sugar === s;
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => setSugar(s)}
+                          style={{ minHeight: 44 }}
+                          className={`
+                            flex items-center gap-1 px-4 py-2 rounded-2xl text-sm font-medium border-2
+                            transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                            ${sel
+                              ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
+                              : 'bg-background border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'}
+                          `}
+                        >
+                          {sel && <Check className="h-3.5 w-3.5 flex-shrink-0" />}
+                          <span>{s}</span>
+                        </button>
+                      );
+                    })}
                   </div>
-                </Section>
+                  <p className="text-xs text-muted-foreground">Adjust sweetness level.</p>
+                </div>
 
-                <Section label="Roast" hint="Choose coffee intensity.">
-                  <div className="flex flex-wrap gap-2">
-                    {ROAST_OPTIONS.map(({ name, hint }) => (
-                      <div key={name} className="relative group/roast">
-                        <Pill selected={roast === name} onClick={() => setRoast(name)}>{name}</Pill>
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded-lg bg-foreground text-background text-xs whitespace-nowrap opacity-0 group-hover/roast:opacity-100 pointer-events-none transition-opacity z-10">
-                          {hint}
-                        </div>
-                      </div>
-                    ))}
+                {/* ROAST */}
+                <div className="px-5 py-4 border-t border-border">
+                  <p className="text-[15px] font-bold text-foreground mb-1">Roast</p>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {ROAST_OPTIONS.map(r => {
+                      const sel = roast === r;
+                      return (
+                        <button
+                          key={r}
+                          onClick={() => setRoast(r)}
+                          style={{ minHeight: 44 }}
+                          className={`
+                            flex items-center gap-1 px-5 py-2 rounded-2xl text-sm font-medium border-2
+                            transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                            ${sel
+                              ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
+                              : 'bg-background border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'}
+                          `}
+                        >
+                          {sel && <Check className="h-3.5 w-3.5 flex-shrink-0" />}
+                          <span>{r}</span>
+                        </button>
+                      );
+                    })}
                   </div>
-                </Section>
+                  <p className="text-xs text-muted-foreground">Choose coffee intensity.</p>
+                </div>
               </>
             )}
-
-            <div className="h-4" />
           </div>
 
-          {/* footer */}
-          <div className="px-5 pt-4 pb-6 border-t border-border bg-background">
+          {/* ── footer ── */}
+          <div className="px-5 pt-4 pb-6 border-t border-border bg-card">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  style={{ minWidth: 44, minHeight: 44 }}
-                  className="rounded-full border-2 border-border flex items-center justify-center hover:border-secondary active:scale-90 transition-all"
+                  style={{ width: 44, height: 44 }}
+                  className="rounded-full border-2 border-border bg-background flex items-center justify-center hover:border-secondary active:scale-90 transition-all"
                 >
                   <Minus className="h-4 w-4" />
                 </button>
-                <span className="font-bold text-xl w-7 text-center tabular-nums">{quantity}</span>
+                <span className="text-xl font-bold w-7 text-center tabular-nums">{quantity}</span>
                 <button
                   onClick={() => setQuantity(q => Math.min(10, q + 1))}
-                  style={{ minWidth: 44, minHeight: 44 }}
-                  className="rounded-full border-2 border-border flex items-center justify-center hover:border-secondary active:scale-90 transition-all"
+                  style={{ width: 44, height: 44 }}
+                  className="rounded-full border-2 border-border bg-background flex items-center justify-center hover:border-secondary active:scale-90 transition-all"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
-              <div>
+              <div className="text-right">
                 <span className="text-sm text-muted-foreground font-medium">Total: </span>
                 <span className="text-2xl font-bold text-foreground tabular-nums">{totalPrice} ETB</span>
               </div>
@@ -304,6 +308,7 @@ export default function OrderProductCard({ group, onAdded }) {
               Add to Order — {totalPrice} ETB
             </button>
           </div>
+
         </DialogContent>
       </Dialog>
     </>

@@ -164,28 +164,26 @@ export default function OrderProductCard({ group, onAdded }) {
                       ? `${s.name} (Base)`
                       : `${s.name} (${s.price_modifier > 0 ? '+' : ''}${s.price_modifier} ETB)`;
                     return (
-
-                      <button
-                        key={s.name}
-                        onClick={() => setSize(s.name)}
-                        className={`
-    flex flex-col items-center justify-center flex-1
-    rounded-2xl border transition-all duration-150
-    py-3 px-3 min-h-[30px]
-    text-sm font-medium select-none
-    active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary
+                        <button
+  key={s.name}
+  onClick={() => setSize(s.name)}
+  className={`
+    flex items-center justify-center gap-1
+    flex-1 rounded-xl border
+    px-3 py-2 min-h-[40px]
+    text-sm font-medium transition-all duration-150
+    active:scale-[0.97] select-none
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary
 
     ${sel
-                            ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
-                            : 'bg-background border-border text-foreground hover:border-secondary/40 hover:bg-secondary/5'}
+      ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
+      : 'bg-background border-border text-foreground hover:border-secondary/40 hover:bg-secondary/5'}
   `}
-                      >
-                        <span className="leading-tight">{label}</span>
+>
+  <span>{label}</span>
+  {sel && <Check className="h-3.5 w-3.5 opacity-90" />}
+</button>
 
-                        {sel && (
-                          <Check className="h-4 w-4 mt-1 text-secondary-foreground opacity-90" />
-                        )}
-                      </button>
 
 
                     );

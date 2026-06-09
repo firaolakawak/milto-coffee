@@ -170,7 +170,7 @@ export default function OrderProductCard({ group, onAdded }) {
   className={`
     flex items-center justify-center gap-1
     flex-1 rounded-xl border
-    px-3 py-2 min-h-[40px]
+    px-3 py-2 min-h-[10px]
     text-sm font-medium transition-all duration-150
     active:scale-[0.97] select-none
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary

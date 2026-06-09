@@ -264,7 +264,7 @@ export default function OrderProductCard({ group, onAdded }) {
                           `}>
                         
                           <span className="text-base leading-none">{icon}</span>
-                          <span>{label}</span>
+                          <span className="text-xs font-medium">{label}</span>
                         </button>);
 
                   })}

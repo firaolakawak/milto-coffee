@@ -19,7 +19,7 @@ const MILK_OPTIONS = [
   { label: 'Almond', icon: '🌰' },
   { label: 'None', icon: '🚫' },
 ];
-const MAX_WORDS = 12;
+const MAX_WORDS = 8;
 
 function ShortTagline({ text }) {
   const words = text.split(" ");
@@ -206,7 +206,7 @@ export default function OrderProductCard({ group, onAdded }) {
             {/* SIZE */}
             {hasSize && (
               <div className="px-5 py-4 border-t border-border">
-                <p className="text-[10px] font-bold text-foreground mb-3">Size</p>
+                <p className="text-[10px] font-bold text-foreground mb-2">Size</p>
                 <div className="flex gap-2">
                   {SIZES.map(s => {
                     const sel = size === s.name;

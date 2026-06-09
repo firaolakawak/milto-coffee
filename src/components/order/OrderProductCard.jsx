@@ -108,7 +108,7 @@ export default function OrderProductCard({ group, onAdded }) {
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl max-h-[92vh] flex flex-col bg-card">
 
           {/* ── header ── */}
-          const MAX_WORDS = 8;
+        
 
  <div className="flex gap-4 px-5 pt-5 pb-4 items-start bg-card">
   <div className="w-[90px] h-[90px] rounded-xl overflow-hidden bg-muted flex-shrink-0 shadow-sm">

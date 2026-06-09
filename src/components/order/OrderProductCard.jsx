@@ -7,56 +7,56 @@ import { useCart } from '@/lib/CartContext';
 import { toast } from 'sonner';
 
 const SIZES = [
-  { name: 'Small',  price_modifier: -10 },
+  { name: 'Small', price_modifier: -10 },
   { name: 'Medium', price_modifier: 0 },
-  { name: 'Large',  price_modifier: 15 },
+  { name: 'Large', price_modifier: 15 },
 ];
 
 const MILK_OPTIONS = [
-  { label: 'Whole',  icon: '🐄' },
-  { label: 'Skim',   icon: '🥛' },
-  { label: 'Oat',    icon: '🌾' },
+  { label: 'Whole', icon: '🐄' },
+  { label: 'Skim', icon: '🥛' },
+  { label: 'Oat', icon: '🌾' },
   { label: 'Almond', icon: '🌰' },
-  { label: 'None',   icon: '🚫' },
+  { label: 'None', icon: '🚫' },
 ];
 
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
 const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 
 const FULL_CUSTOM_CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'specialty'];
-const SIZE_ONLY_CATEGORIES   = ['traditional', 'cold_brew'];
+const SIZE_ONLY_CATEGORIES = ['traditional', 'cold_brew'];
 
 export default function OrderProductCard({ group, onAdded }) {
-  const [open, setOpen]                       = useState(false);
+  const [open, setOpen] = useState(false);
   const [activeProductId, setActiveProductId] = useState(null);
-  const [size, setSize]                       = useState('Medium');
-  const [milk, setMilk]                       = useState('Whole');
-  const [sugar, setSugar]                     = useState('Regular');
-  const [roast, setRoast]                     = useState('Regular');
-  const [quantity, setQuantity]               = useState(1);
-  const [showDetails, setShowDetails]         = useState(false);
+  const [size, setSize] = useState('Medium');
+  const [milk, setMilk] = useState('Whole');
+  const [sugar, setSugar] = useState('Regular');
+  const [roast, setRoast] = useState('Regular');
+  const [quantity, setQuantity] = useState(1);
+  const [showDetails, setShowDetails] = useState(false);
   const { addItem } = useCart();
 
-  const products       = group.products;
+  const products = group.products;
   const primaryProduct = products[0];
-  const isGrouped      = products.length > 1;
-  const activeProduct  = products.find(p => p.id === activeProductId) || primaryProduct;
+  const isGrouped = products.length > 1;
+  const activeProduct = products.find(p => p.id === activeProductId) || primaryProduct;
 
   const hasFullCustomizations = FULL_CUSTOM_CATEGORIES.includes(activeProduct.category);
-  const hasSizeOnly           = SIZE_ONLY_CATEGORIES.includes(activeProduct.category);
-  const hasSize               = hasFullCustomizations || hasSizeOnly;
-  const sizeData              = hasSize ? SIZES.find(s => s.name === size) : null;
-  const unitPrice             = activeProduct.price + (sizeData?.price_modifier || 0);
-  const totalPrice            = unitPrice * quantity;
+  const hasSizeOnly = SIZE_ONLY_CATEGORIES.includes(activeProduct.category);
+  const hasSize = hasFullCustomizations || hasSizeOnly;
+  const sizeData = hasSize ? SIZES.find(s => s.name === size) : null;
+  const unitPrice = activeProduct.price + (sizeData?.price_modifier || 0);
+  const totalPrice = unitPrice * quantity;
 
-  const prices     = products.map(p => p.price);
-  const minPrice   = Math.min(...prices);
-  const maxPrice   = Math.max(...prices);
+  const prices = products.map(p => p.price);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
   const priceLabel = minPrice === maxPrice ? `${minPrice} ETB` : `${minPrice}–${maxPrice} ETB`;
-  const cardImage  = products.find(p => p.image_url)?.image_url;
+  const cardImage = products.find(p => p.image_url)?.image_url;
 
-  const fullDesc  = activeProduct.description || '';
-  const tagline   = fullDesc.split('.')[0] + (fullDesc.includes('.') ? '.' : '');
+  const fullDesc = activeProduct.description || '';
+  const tagline = fullDesc.split('.')[0] + (fullDesc.includes('.') ? '.' : '');
   const extraDesc = fullDesc.slice(tagline.length).trim();
 
   const handleOpen = () => {
@@ -85,8 +85,8 @@ export default function OrderProductCard({ group, onAdded }) {
         <div className="h-28 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center overflow-hidden relative">
           {cardImage
             ? <img src={cardImage} alt={group.baseName}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                onError={e => { e.target.style.display = 'none'; }} />
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={e => { e.target.style.display = 'none'; }} />
             : <span className="text-4xl opacity-50">☕</span>}
         </div>
         <CardContent className="p-3">
@@ -159,16 +159,16 @@ export default function OrderProductCard({ group, onAdded }) {
                 <p className="text-[15px] font-bold text-foreground mb-3">Size</p>
                 <div className="flex gap-2">
                   {SIZES.map(s => {
-                    const sel   = size === s.name;
+                    const sel = size === s.name;
                     const label = s.price_modifier === 0
                       ? `${s.name} (Base)`
                       : `${s.name} (${s.price_modifier > 0 ? '+' : ''}${s.price_modifier} ETB)`;
                     return (
-                      
-<button
-  key={s.name}
-  onClick={() => setSize(s.name)}
-  className={`
+
+                      <button
+                        key={s.name}
+                        onClick={() => setSize(s.name)}
+                        className={`
     flex flex-col items-center justify-center flex-1
     rounded-2xl border transition-all duration-150
     py-3 px-3 min-h-[56px]
@@ -176,16 +176,16 @@ export default function OrderProductCard({ group, onAdded }) {
     active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary
 
     ${sel
-      ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
-      : 'bg-background border-border text-foreground hover:border-secondary/40 hover:bg-secondary/5'}
+                            ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
+                            : 'bg-background border-border text-foreground hover:border-secondary/40 hover:bg-secondary/5'}
   `}
->
-  <span className="leading-tight">{label}</span>
+                      >
+                        <span className="leading-tight">{label}</span>
 
-  {sel && (
-    <Check className="h-4 w-4 mt-1 text-secondary-foreground opacity-90" />
-  )}
-</button>
+                        {sel && (
+                          <Check className="h-4 w-4 mt-1 text-secondary-foreground opacity-90" />
+                        )}
+                      </button>
 
 
                     );

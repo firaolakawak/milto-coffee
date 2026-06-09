@@ -21,10 +21,10 @@ export default function About() {
           origins of our single-origin beans, joining one of our brewing workshops, or tracking your order
           in real time, Milto Coffee brings the full Ethiopian coffee experience to your fingertips.
         </p>
-        <p>
-          Through our loyalty rewards program, regular customers earn points with every purchase and unlock
-          exclusive perks, free drinks, and early access to special events. We believe great coffee should
-          come with great value — and a community that celebrates it.
+        <p>Through our loyalty rewards program, regular customers earn points with every purchase and unlock exclusive perks, free drinks, and early access to special events. We believe great coffee should come with great value  and a community that celebrates it.
+
+
+
         </p>
         <p>
           Milto Coffee is proudly built and operated by a passionate team based in Addis Ababa, Ethiopia.
@@ -41,19 +41,19 @@ export default function About() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
         {[
-          { icon: Coffee, title: 'Specialty Coffee', desc: 'Ethipian single-origin beans, expertly roasted.' },
-          { icon: Leaf,   title: 'Sustainable',      desc: 'Direct trade with local farmers for a fairer future.' },
-          { icon: Heart,  title: 'Community',        desc: 'Events, workshops, and a loyalty program built for you.' },
-          { icon: MapPin, title: 'Multi-Branch',     desc: 'Find us across Addis Ababa and beyond.' },
-        ].map(item => (
-          <div key={item.title} className="bg-card rounded-2xl p-5 border border-border/50 shadow-sm">
+        { icon: Coffee, title: 'Specialty Coffee', desc: 'Ethipian single-origin beans, expertly roasted.' },
+        { icon: Leaf, title: 'Sustainable', desc: 'Direct trade with local farmers for a fairer future.' },
+        { icon: Heart, title: 'Community', desc: 'Events, workshops, and a loyalty program built for you.' },
+        { icon: MapPin, title: 'Multi-Branch', desc: 'Find us across Addis Ababa and beyond.' }].
+        map((item) =>
+        <div key={item.title} className="bg-card rounded-2xl p-5 border border-border/50 shadow-sm">
             <div className="w-10 h-10 rounded-xl bg-secondary/15 flex items-center justify-center mb-3">
               <item.icon className="h-5 w-5 text-secondary" />
             </div>
             <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
             <p className="text-xs text-muted-foreground">{item.desc}</p>
           </div>
-        ))}
+        )}
       </div>
 
       <div className="mt-10 flex gap-3">
@@ -64,6 +64,6 @@ export default function About() {
           Contact Us
         </Link>
       </div>
-    </div>
-  );
+    </div>);
+
 }

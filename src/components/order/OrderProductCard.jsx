@@ -164,21 +164,30 @@ export default function OrderProductCard({ group, onAdded }) {
                       ? `${s.name} (Base)`
                       : `${s.name} (${s.price_modifier > 0 ? '+' : ''}${s.price_modifier} ETB)`;
                     return (
-                      <button
-                        key={s.name}
-                        onClick={() => setSize(s.name)}
-                        style={{ minHeight: 52 }}
-                        className={`
-                          flex-1 py-3 px-2 rounded-2xl text-sm font-semibold border-2
-                          transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-                          ${sel
-                            ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
-                            : 'bg-background border-border text-foreground hover:border-secondary/50 hover:bg-secondary/5'}
-                        `}
-                      >
-                        <span className="block">{label}</span>
-                        {sel && <Check className="h-3.5 w-3.5 mx-auto mt-1 opacity-90" />}
-                      </button>
+                      
+<button
+  key={s.name}
+  onClick={() => setSize(s.name)}
+  className={`
+    flex flex-col items-center justify-center flex-1
+    rounded-2xl border transition-all duration-150
+    py-3 px-3 min-h-[56px]
+    text-sm font-medium select-none
+    active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary
+
+    ${sel
+      ? 'bg-secondary text-secondary-foreground border-secondary shadow-sm'
+      : 'bg-background border-border text-foreground hover:border-secondary/40 hover:bg-secondary/5'}
+  `}
+>
+  <span className="leading-tight">{label}</span>
+
+  {sel && (
+    <Check className="h-4 w-4 mt-1 text-secondary-foreground opacity-90" />
+  )}
+</button>
+
+
                     );
                   })}
                 </div>

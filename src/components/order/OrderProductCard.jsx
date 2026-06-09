@@ -218,14 +218,14 @@ export default function OrderProductCard({ group, onAdded }) {
                       key={s.name}
                       onClick={() => setSize(s.name)}
                       className={`
-    flex items-center justify-center gap-1
-    flex-1 rounded-xl border
-    px-3 py-2 min-h-[10px]
-    text-sm font-medium transition-all duration-150
-    active:scale-[0.97] select-none
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary
+    flex items-center justify-center gap-1 flex-1 rounded-xl border px-3 py-2 min-h-[10px] transition-all duration-150 active:scale-[0.97] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary text-xs font-normal
 
-    ${sel ?
+    ${
+
+
+
+
+                      sel ?
                       'bg-secondary text-secondary-foreground border-secondary shadow-sm' :
                       'bg-background border-border text-foreground hover:border-secondary/40 hover:bg-secondary/5'}
   `}>

@@ -19,6 +19,8 @@ const MILK_OPTIONS = [
   { label: 'Almond', icon: '🌰' },
   { label: 'None', icon: '🚫' },
 ];
+const MAX_WORDS = 12;
+
 function ShortTagline({ text }) {
   const words = text.split(" ");
   const isLong = words.length > MAX_WORDS;

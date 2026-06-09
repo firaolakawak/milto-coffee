@@ -18,6 +18,12 @@ const MILK_OPTIONS = ['Whole', 'Skim', 'Oat', 'Almond', 'None'];
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
 const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 
+// Categories that get full customizations (size + milk + sugar + roast)
+const FULL_CUSTOM_CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'specialty'];
+// Categories that get size only
+const SIZE_ONLY_CATEGORIES = ['traditional', 'cold_brew'];
+// Categories with no customizations: pastries, snacks, beans
+
 export default function ProductCard({ group }) {
   const [open, setOpen] = useState(false);
   const [activeProductId, setActiveProductId] = useState(null);
@@ -35,8 +41,10 @@ export default function ProductCard({ group }) {
   // The currently active product in the dialog
   const activeProduct = products.find(p => p.id === activeProductId) || primaryProduct;
 
-  const isBeverage = !['pastries', 'snacks', 'beans'].includes(activeProduct.category);
-  const sizeData = SIZES.find(s => s.name === size);
+  const hasFullCustomizations = FULL_CUSTOM_CATEGORIES.includes(activeProduct.category);
+  const hasSizeOnly = SIZE_ONLY_CATEGORIES.includes(activeProduct.category);
+  const hasSize = hasFullCustomizations || hasSizeOnly;
+  const sizeData = hasSize ? SIZES.find(s => s.name === size) : null;
   const unitPrice = activeProduct.price + (sizeData?.price_modifier || 0);
 
   // Price display on the card: show range if variants differ in price
@@ -65,8 +73,8 @@ export default function ProductCard({ group }) {
   };
 
   const handleAdd = () => {
-    const customizations = isBeverage ? { milk, sugar, roast } : {};
-    addItem({ ...activeProduct, sizes: SIZES }, quantity, size, customizations);
+    const customizations = hasFullCustomizations ? { milk, sugar, roast } : {};
+    addItem({ ...activeProduct, sizes: hasSize ? SIZES : [] }, quantity, hasSize ? size : null, customizations);
     toast.success(`Added ${activeProduct.name} to cart`);
     setOpen(false);
     setQuantity(1);
@@ -143,23 +151,25 @@ export default function ProductCard({ group }) {
               <p className="text-sm text-muted-foreground">{activeProduct.description}</p>
             )}
 
-            {isBeverage && (
-              <>
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">Size</Label>
-                  <div className="flex gap-2">
-                    {SIZES.map(s => (
-                      <button
-                        key={s.name}
-                        onClick={() => setSize(s.name)}
-                        className={`flex-1 py-2 px-3 rounded-full text-sm font-medium border transition-all ${size === s.name ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
-                      >
-                        {s.name}<br />
-                        <span className="text-xs opacity-75">{s.price_modifier >= 0 ? '+' : ''}{s.price_modifier} ETB</span>
-                      </button>
-                    ))}
-                  </div>
+            {hasSize && (
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Size</Label>
+                <div className="flex gap-2">
+                  {SIZES.map(s => (
+                    <button
+                      key={s.name}
+                      onClick={() => setSize(s.name)}
+                      className={`flex-1 py-2 px-3 rounded-full text-sm font-medium border transition-all ${size === s.name ? 'bg-secondary text-secondary-foreground border-secondary' : 'bg-transparent border-border text-muted-foreground hover:border-secondary/50'}`}
+                    >
+                      {s.name}<br />
+                      <span className="text-xs opacity-75">{s.price_modifier >= 0 ? '+' : ''}{s.price_modifier} ETB</span>
+                    </button>
+                  ))}
                 </div>
+              </div>
+            )}
+            {hasFullCustomizations && (
+              <>
                 <div>
                   <Label className="text-sm font-medium mb-2 block">Milk</Label>
                   <div className="flex flex-wrap gap-2">

@@ -18,6 +18,9 @@ const MILK_OPTIONS = ['Whole', 'Skim', 'Oat', 'Almond', 'None'];
 const SUGAR_OPTIONS = ['None', 'Light', 'Regular', 'Extra'];
 const ROAST_OPTIONS = ['Light', 'Regular', 'Dark'];
 
+const FULL_CUSTOM_CATEGORIES = ['espresso', 'macchiato', 'cappuccino', 'latte', 'specialty'];
+const SIZE_ONLY_CATEGORIES = ['traditional', 'cold_brew'];
+
 export default function OrderProductCard({ group, onAdded }) {
   const [open, setOpen] = useState(false);
   const [activeProductId, setActiveProductId] = useState(null);
@@ -32,8 +35,10 @@ export default function OrderProductCard({ group, onAdded }) {
   const primaryProduct = products[0];
   const isGrouped = products.length > 1;
   const activeProduct = products.find(p => p.id === activeProductId) || primaryProduct;
-  const isBeverage = !['pastries', 'snacks', 'beans'].includes(activeProduct.category);
-  const sizeData = SIZES.find(s => s.name === size);
+  const hasFullCustomizations = FULL_CUSTOM_CATEGORIES.includes(activeProduct.category);
+  const hasSizeOnly = SIZE_ONLY_CATEGORIES.includes(activeProduct.category);
+  const hasSize = hasFullCustomizations || hasSizeOnly;
+  const sizeData = hasSize ? SIZES.find(s => s.name === size) : null;
   const unitPrice = activeProduct.price + (sizeData?.price_modifier || 0);
   const prices = products.map(p => p.price);
   const minPrice = Math.min(...prices);
@@ -52,8 +57,8 @@ export default function OrderProductCard({ group, onAdded }) {
   };
 
   const handleAdd = () => {
-    const customizations = isBeverage ? { milk, sugar, roast } : {};
-    addItem({ ...activeProduct, sizes: SIZES }, quantity, size, customizations);
+    const customizations = hasFullCustomizations ? { milk, sugar, roast } : {};
+    addItem({ ...activeProduct, sizes: hasSize ? SIZES : [] }, quantity, hasSize ? size : null, customizations);
     toast.success(`Added ${activeProduct.name}`);
     setOpen(false);
     setQuantity(1);
@@ -119,20 +124,22 @@ export default function OrderProductCard({ group, onAdded }) {
               <p className="text-sm text-muted-foreground">{activeProduct.description}</p>
             )}
 
-            {isBeverage && (
-              <>
-                <div>
-                  <Label className="text-xs font-medium mb-2 block">Size</Label>
-                  <div className="flex gap-2">
-                    {SIZES.map(s => (
-                      <button key={s.name} onClick={() => setSize(s.name)}
-                        className={`flex-1 py-2 px-2 rounded-xl text-xs font-medium border transition-all ${size === s.name ? 'bg-secondary text-secondary-foreground border-secondary' : 'border-border text-muted-foreground hover:border-secondary/50'}`}>
-                        {s.name}<br />
-                        <span className="opacity-75">{s.price_modifier >= 0 ? '+' : ''}{s.price_modifier}</span>
-                      </button>
-                    ))}
-                  </div>
+            {hasSize && (
+              <div>
+                <Label className="text-xs font-medium mb-2 block">Size</Label>
+                <div className="flex gap-2">
+                  {SIZES.map(s => (
+                    <button key={s.name} onClick={() => setSize(s.name)}
+                      className={`flex-1 py-2 px-2 rounded-xl text-xs font-medium border transition-all ${size === s.name ? 'bg-secondary text-secondary-foreground border-secondary' : 'border-border text-muted-foreground hover:border-secondary/50'}`}>
+                      {s.name}<br />
+                      <span className="opacity-75">{s.price_modifier >= 0 ? '+' : ''}{s.price_modifier}</span>
+                    </button>
+                  ))}
                 </div>
+              </div>
+            )}
+            {hasFullCustomizations && (
+              <>
                 <div>
                   <Label className="text-xs font-medium mb-2 block">Milk</Label>
                   <div className="flex flex-wrap gap-1.5">

@@ -108,47 +108,74 @@ export default function OrderProductCard({ group, onAdded }) {
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl max-h-[92vh] flex flex-col bg-card">
 
           {/* ── header ── */}
-          <div className="flex gap-4 px-5 pt-5 pb-4 items-start bg-card">
-            <div className="w-[90px] h-[90px] rounded-xl overflow-hidden bg-muted flex-shrink-0 shadow-sm">
-              {cardImage
-                ? <img src={cardImage} alt={activeProduct.name} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-4xl">☕</div>}
-            </div>
-            <div className="flex-1 pt-0.5 min-w-0">
-              <h2 className="font-display text-[22px] font-bold text-primary leading-tight">{activeProduct.name}</h2>
-              {tagline && (
-                <p className="text-sm text-foreground/70 mt-1 leading-snug">{tagline}</p>
-              )}
-              {extraDesc && (
-                <>
-                  <button
-                    onClick={() => setShowDetails(v => !v)}
-                    className="flex items-center gap-0.5 text-sm text-primary underline underline-offset-2 mt-1.5 font-medium hover:text-primary/80 transition-colors"
-                  >
-                    {showDetails ? 'Hide details' : 'More details'}
-                    <ChevronRight className={`h-3.5 w-3.5 transition-transform ${showDetails ? 'rotate-90' : ''}`} />
-                  </button>
-                  {showDetails && (
-                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{extraDesc}</p>
-                  )}
-                </>
-              )}
-              {isGrouped && (
-                <div className="mt-2">
-                  <Tabs value={activeProduct.id} onValueChange={id => { setActiveProductId(id); setSize('Medium'); }}>
-                    <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 rounded-xl">
-                      {products.map(p => (
-                        <TabsTrigger key={p.id} value={p.id}
-                          className="rounded-lg text-xs px-3 py-1.5 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">
-                          {p.variantName}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                </div>
-              )}
-            </div>
-          </div>
+          const MAX_WORDS = 8;
+
+ <div className="flex gap-4 px-5 pt-5 pb-4 items-start bg-card">
+  <div className="w-[90px] h-[90px] rounded-xl overflow-hidden bg-muted flex-shrink-0 shadow-sm">
+    {cardImage ? (
+      <img
+        src={cardImage}
+        alt={activeProduct.name}
+        className="w-full h-full object-cover"
+      />
+    ) : (
+      <div className="w-full h-full flex items-center justify-center text-4xl">☕</div>
+    )}
+  </div>
+
+  <div className="flex-1 pt-0.5 min-w-0">
+    <h2 className="font-display text-[22px] font-bold text-primary leading-tight">
+      {activeProduct.name}
+    </h2>
+
+    {tagline && <ShortTagline text={tagline} />}
+
+    {extraDesc && (
+      <>
+        <button
+          onClick={() => setShowDetails(v => !v)}
+          className="flex items-center gap-1 text-sm text-primary underline underline-offset-2 mt-1.5 font-medium hover:text-primary/80 transition-colors"
+        >
+          {showDetails ? 'Hide details' : 'See more...'}
+          <ChevronRight
+            className={`h-3.5 w-3.5 transition-transform ${showDetails ? 'rotate-90' : ''}`}
+          />
+        </button>
+
+        {showDetails && (
+          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+            {extraDesc}
+          </p>
+        )}
+      </>
+    )}
+
+    {isGrouped && (
+      <div className="mt-2">
+        <Tabs
+          value={activeProduct.id}
+          onValueChange={id => {
+            setActiveProductId(id);
+            setSize('Medium');
+          }}
+        >
+          <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 rounded-xl">
+            {products.map(p => (
+              <TabsTrigger
+                key={p.id}
+                value={p.id}
+                className="rounded-lg text-xs px-3 py-1.5 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+              >
+                {p.variantName}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
+    )}
+  </div>
+</div>
+
 
           {/* ── scrollable sections ── */}
           <div className="overflow-y-auto flex-1 bg-card">

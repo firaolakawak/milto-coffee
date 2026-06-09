@@ -211,7 +211,7 @@ export default function OrderProductCard({ group, onAdded }) {
                   {SIZES.map(s => {
                     const sel = size === s.name;
                     const label = s.price_modifier === 0
-                      ? `${s.name} (Base)`
+                      ? `${s.name} ()`
                       : `${s.name} (${s.price_modifier > 0 ? '+' : ''}${s.price_modifier})`;
                     return (
                         <button

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MobileSheetSelect } from '@/components/ui/MobileSheetSelect';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -139,12 +139,13 @@ export default function OrderSummaryPanel({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
               <MapPin className="h-3 w-3" /> {isDelivery ? 'Nearest Branch' : 'Pickup Branch'}
             </p>
-            <Select value={selectedBranch || ''} onValueChange={setSelectedBranch}>
-              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select branch" /></SelectTrigger>
-              <SelectContent>
-                {branches.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <MobileSheetSelect
+              value={selectedBranch || ''}
+              onValueChange={setSelectedBranch}
+              placeholder="Select branch"
+              triggerClassName="h-9 text-sm"
+              options={branches.map(b => ({ value: b.id, label: b.name }))}
+            />
             {isDelivery && (
               <Input
                 placeholder="Delivery address..."

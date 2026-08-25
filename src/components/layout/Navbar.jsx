@@ -23,8 +23,12 @@ export default function Navbar() {
   const { itemCount } = useCart();
   const { user } = useAuth();
 
+  // On mobile, only show the Navbar on primary tab routes; sub-pages use MobileHeader.
+  const MOBILE_PRIMARY_ROUTES = ['/', '/order', '/orders', '/profile'];
+  const showNavbarOnMobile = MOBILE_PRIMARY_ROUTES.includes(pathname);
+
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
+    <nav className={`sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 ${showNavbarOnMobile ? '' : 'hidden md:block'}`}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <img src="https://media.base44.com/images/public/6a2091b55874dccfc09ef00c/2307f935d_milto.png" alt="Milto Coffee" className="h-10 w-10 rounded-full object-cover" />

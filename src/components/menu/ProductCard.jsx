@@ -80,7 +80,7 @@ export default function ProductCard({ group }) {
     <>
       {/* ── product card ── */}
       <Card
-        className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
+        className="group overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer select-none"
         onClick={handleOpen}
       >
         <div className="h-40 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center overflow-hidden relative">

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MobileSheetSelect } from '@/components/ui/MobileSheetSelect';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -211,12 +211,12 @@ export default function Cart() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
-              <Select value={selectedBranch || ''} onValueChange={setSelectedBranch}>
-                <SelectTrigger><SelectValue placeholder="Select branch" /></SelectTrigger>
-                <SelectContent>
-                  {branches.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <MobileSheetSelect
+                value={selectedBranch || ''}
+                onValueChange={setSelectedBranch}
+                placeholder="Select branch"
+                options={branches.map(b => ({ value: b.id, label: b.name }))}
+              />
               {isDelivery && (
                 <Input
                   placeholder="Enter your delivery address..."

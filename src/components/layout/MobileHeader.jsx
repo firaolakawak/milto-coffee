@@ -30,7 +30,6 @@ export default function MobileHeader() {
   return (
     <div
       className="md:hidden flex items-center h-14 px-2 bg-background/95 backdrop-blur-xl border-b border-border/50 sticky top-0 z-40"
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
         <ChevronLeft className="h-5 w-5" />

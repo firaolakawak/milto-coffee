@@ -102,7 +102,7 @@ export default function OrderProductCard({ group, onAdded }) {
     <>
       {/* ── card ── */}
       <Card
-        className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+        className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer select-none"
         onClick={handleOpen}>
         
         <div className="h-28 bg-gradient-to-br from-primary/5 to-secondary/10 flex items-center justify-center overflow-hidden relative">

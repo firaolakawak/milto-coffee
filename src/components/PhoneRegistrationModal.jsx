@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MobileSheetSelect } from '@/components/ui/MobileSheetSelect';
 import { Phone, Coffee, Loader2 } from 'lucide-react';
 
 const coffeeOptions = [
@@ -103,18 +103,13 @@ export default function PhoneRegistrationModal({ open, onComplete }) {
               <Coffee className="h-4 w-4 text-secondary" />
               Favorite Coffee
             </Label>
-            <Select value={favoriteCoffee} onValueChange={setFavoriteCoffee}>
-              <SelectTrigger id="coffee">
-                <SelectValue placeholder="Select your favorite coffee" />
-              </SelectTrigger>
-              <SelectContent>
-                {coffeeOptions.map(coffee => (
-                  <SelectItem key={coffee} value={coffee}>
-                    {coffee}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MobileSheetSelect
+              value={favoriteCoffee}
+              onValueChange={setFavoriteCoffee}
+              placeholder="Select your favorite coffee"
+              id="coffee"
+              options={coffeeOptions.map(coffee => ({ value: coffee, label: coffee }))}
+            />
           </div>
 
           <Button

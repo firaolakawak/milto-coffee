@@ -1,7 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+const defaultSupabaseUrl = 'https://erviocuzzryaenitjzqp.supabase.co';
+const defaultSupabasePublishableKey = 'sb_publishable_W4tJAOlzieFkQTEXi9iI9A_3w2JHxOh';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || defaultSupabaseUrl;
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+  || import.meta.env.VITE_SUPABASE_ANON_KEY
+  || defaultSupabasePublishableKey;
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 
@@ -254,17 +259,23 @@ export const backend = {
         .maybeSingle();
       throwIfError(readError);
 
+      const profileData = { ...(current?.data || {}), ...values };
       const { data, error } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          email: user.email,
-          data: { ...(current?.data || {}), ...values },
-        })
+        .update({ email: user.email, data: profileData })
+        .eq('id', user.id)
+        .select()
+        .maybeSingle();
+      throwIfError(error);
+      if (data) return unwrapProfile(data, user);
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('profiles')
+        .insert({ id: user.id, email: user.email, data: profileData })
         .select()
         .single();
-      throwIfError(error);
-      return unwrapProfile(data, user);
+      throwIfError(insertError);
+      return unwrapProfile(inserted, user);
     },
 
     async loginWithProvider(provider, returnTo = '/') {

@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSheetSelect from '@/components/ui/MobileSheetSelect';
 import { LogOut, Settings, ShoppingBag, Coins, Star, Trash2, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -150,35 +150,34 @@ export default function Profile() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  <Select value={birthdayMonth} onValueChange={setBirthdayMonth}>
-                    <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
-                    <SelectContent>
-                      {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
-                        <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={birthdayDay} onValueChange={setBirthdayDay}>
-                    <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 31 }, (_, i) => (
-                        <SelectItem key={i} value={String(i + 1)}>{i + 1}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <MobileSheetSelect
+                    value={birthdayMonth}
+                    onValueChange={setBirthdayMonth}
+                    placeholder="Month"
+                    options={['January','February','March','April','May','June','July','August','September','October','November','December'].map((label, i) => ({ value: String(i + 1), label }))}
+                  />
+                  <MobileSheetSelect
+                    value={birthdayDay}
+                    onValueChange={setBirthdayDay}
+                    placeholder="Day"
+                    options={Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))}
+                  />
                 </div>
               )}
             </div>
 
             <div>
               <Label className="text-sm">Preferred Language</Label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="am">አማርኛ (Amharic)</SelectItem>
-                </SelectContent>
-              </Select>
+              <MobileSheetSelect
+                value={language}
+                onValueChange={setLanguage}
+                placeholder="Language"
+                triggerClassName="mt-1"
+                options={[
+                  { value: 'en', label: 'English' },
+                  { value: 'am', label: 'አማርኛ (Amharic)' },
+                ]}
+              />
             </div>
             <div>
               <Label className="text-sm">Favorite Coffee</Label>

@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSheetSelect from '@/components/ui/MobileSheetSelect';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, ChefHat, Coffee, Check, X, Search, Truck, ChevronDown, ChevronUp, Phone, MapPin, FileText, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
@@ -291,15 +291,13 @@ export default function OrdersAdmin() {
               <Input placeholder="Search order # or customer..." value={search} onChange={(e) => handleSearch(e.target.value)} className="pl-9 rounded-full" />
             </div>
             <Input type="date" value={dateFilter} onChange={e => handleDateFilter(e.target.value)} className="h-9 text-xs w-40" />
-            <Select value={monthFilter || 'all'} onValueChange={handleMonthFilter}>
-              <SelectTrigger className="h-9 text-xs w-40">
-                <SelectValue placeholder="Filter by month" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All months</SelectItem>
-                {monthOptions.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <MobileSheetSelect
+              value={monthFilter || 'all'}
+              onValueChange={handleMonthFilter}
+              placeholder="Filter by month"
+              triggerClassName="h-9 text-xs w-40"
+              options={[{ value: 'all', label: 'All months' }, ...monthOptions]}
+            />
             {(dateFilter || monthFilter) && (
               <Button variant="ghost" size="sm" className="h-9 text-xs text-muted-foreground" onClick={() => { setDateFilter(''); setMonthFilter(''); setPage(1); }}>Clear</Button>
             )}

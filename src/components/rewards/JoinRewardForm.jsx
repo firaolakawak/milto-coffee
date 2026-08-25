@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSheetSelect from '@/components/ui/MobileSheetSelect';
 import { CheckCircle2 } from 'lucide-react';
 
 function generateReferralCode(name) {
@@ -140,22 +140,18 @@ export default function JoinRewardForm({ onJoined }) {
           <h2 className="font-heading text-base font-semibold text-foreground mb-1">Your birthday (optional)</h2>
           <p className="text-xs text-muted-foreground mb-3">Get a free drink on your birthday 🎂</p>
           <div className="grid grid-cols-2 gap-3">
-            <Select value={birthdayMonth} onValueChange={setBirthdayMonth}>
-              <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
-              <SelectContent>
-                {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
-                  <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={birthdayDay} onValueChange={setBirthdayDay}>
-              <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 31 }, (_, i) => (
-                  <SelectItem key={i} value={String(i + 1)}>{i + 1}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MobileSheetSelect
+              value={birthdayMonth}
+              onValueChange={setBirthdayMonth}
+              placeholder="Month"
+              options={['January','February','March','April','May','June','July','August','September','October','November','December'].map((label, i) => ({ value: String(i + 1), label }))}
+            />
+            <MobileSheetSelect
+              value={birthdayDay}
+              onValueChange={setBirthdayDay}
+              placeholder="Day"
+              options={Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))}
+            />
           </div>
         </div>
 

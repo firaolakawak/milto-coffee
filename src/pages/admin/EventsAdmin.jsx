@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSheetSelect from '@/components/ui/MobileSheetSelect';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2, Calendar, Users } from 'lucide-react';
@@ -76,10 +76,13 @@ export default function EventsAdmin() {
             <div><Label className="text-xs">Title</Label><Input value={form.title} onChange={e => set('title', e.target.value)} /></div>
             <div><Label className="text-xs">Title (Amharic)</Label><Input value={form.title_am} onChange={e => set('title_am', e.target.value)} /></div>
             <div><Label className="text-xs">Type</Label>
-              <Select value={form.type} onValueChange={v => set('type', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{TYPES.map(t => <SelectItem key={t} value={t} className="capitalize">{t.replace('_', ' ')}</SelectItem>)}</SelectContent>
-              </Select>
+              <MobileSheetSelect
+                value={form.type}
+                onValueChange={v => set('type', v)}
+                placeholder="Event type"
+                options={TYPES.map(value => ({ value, label: value.replace('_', ' ') }))}
+                triggerClassName="capitalize"
+              />
             </div>
             <div><Label className="text-xs">Date & Time</Label><Input type="datetime-local" value={form.date} onChange={e => set('date', e.target.value)} /></div>
             <div><Label className="text-xs">Description</Label><Textarea value={form.description} onChange={e => set('description', e.target.value)} rows={2} /></div>

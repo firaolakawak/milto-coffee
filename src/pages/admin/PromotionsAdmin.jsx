@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSheetSelect from '@/components/ui/MobileSheetSelect';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2, Percent, DollarSign } from 'lucide-react';
@@ -77,13 +77,15 @@ export default function PromotionsAdmin() {
             <div><Label className="text-xs">Description</Label><Textarea value={form.description} onChange={e => set('description', e.target.value)} rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-xs">Discount Type</Label>
-                <Select value={form.discount_type} onValueChange={v => set('discount_type', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentage</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount</SelectItem>
-                  </SelectContent>
-                </Select>
+                <MobileSheetSelect
+                  value={form.discount_type}
+                  onValueChange={v => set('discount_type', v)}
+                  placeholder="Discount type"
+                  options={[
+                    { value: 'percentage', label: 'Percentage' },
+                    { value: 'fixed', label: 'Fixed Amount' },
+                  ]}
+                />
               </div>
               <div><Label className="text-xs">Discount Value</Label><Input type="number" value={form.discount_value} onChange={e => set('discount_value', Number(e.target.value))} /></div>
             </div>

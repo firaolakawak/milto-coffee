@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSheetSelect from '@/components/ui/MobileSheetSelect';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
 
@@ -44,22 +44,18 @@ export default function BirthdayPromptModal() {
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-3 mt-2">
-          <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
-            <SelectContent>
-              {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
-                <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={day} onValueChange={setDay}>
-            <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 31 }, (_, i) => (
-                <SelectItem key={i} value={String(i + 1)}>{i + 1}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MobileSheetSelect
+            value={month}
+            onValueChange={setMonth}
+            placeholder="Month"
+            options={['January','February','March','April','May','June','July','August','September','October','November','December'].map((label, i) => ({ value: String(i + 1), label }))}
+          />
+          <MobileSheetSelect
+            value={day}
+            onValueChange={setDay}
+            placeholder="Day"
+            options={Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }))}
+          />
         </div>
 
         <div className="flex gap-2 mt-2">

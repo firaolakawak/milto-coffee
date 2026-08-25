@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MobileSheetSelect from '@/components/ui/MobileSheetSelect';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -199,10 +199,13 @@ export default function ProductsAdmin() {
             <div><Label className="text-xs">Name</Label><Input value={form.name} onChange={e => set('name', e.target.value)} /></div>
             <div><Label className="text-xs">Name (Amharic)</Label><Input value={form.name_am} onChange={e => set('name_am', e.target.value)} /></div>
             <div><Label className="text-xs">Category</Label>
-              <Select value={form.category} onValueChange={v => set('category', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c} className="capitalize">{c.replace('_', ' ')}</SelectItem>)}</SelectContent>
-              </Select>
+              <MobileSheetSelect
+                value={form.category}
+                onValueChange={v => set('category', v)}
+                placeholder="Category"
+                options={CATEGORIES.map(value => ({ value, label: value.replace('_', ' ') }))}
+                triggerClassName="capitalize"
+              />
             </div>
             <div><Label className="text-xs">Price (ETB)</Label><Input type="number" value={form.price} onChange={e => set('price', Number(e.target.value))} /></div>
             <div><Label className="text-xs">Description</Label><Textarea value={form.description} onChange={e => set('description', e.target.value)} rows={2} /></div>

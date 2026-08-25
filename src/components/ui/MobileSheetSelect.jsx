@@ -22,6 +22,8 @@ export function MobileSheetSelect({
   options = [],
   triggerClassName,
   id,
+  disabled = false,
+  drawerTitle,
 }) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -29,7 +31,7 @@ export function MobileSheetSelect({
 
   if (!isMobile) {
     return (
-      <Select value={value} onValueChange={onValueChange}>
+      <Select value={value} onValueChange={onValueChange} disabled={disabled}>
         <SelectTrigger id={id} className={triggerClassName}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -48,6 +50,9 @@ export function MobileSheetSelect({
         <button
           id={id}
           type="button"
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={open}
           className={cn(
             'flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
             triggerClassName
@@ -61,15 +66,20 @@ export function MobileSheetSelect({
       </DrawerTrigger>
       <DrawerContent className="max-h-[70vh]">
         <DrawerHeader className="pb-2">
-          <DrawerTitle>{placeholder || 'Select an option'}</DrawerTitle>
+          <DrawerTitle>{drawerTitle || placeholder || 'Select an option'}</DrawerTitle>
         </DrawerHeader>
-        <div className="overflow-y-auto px-2 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div
+          role="listbox"
+          className="overflow-y-auto px-2 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+        >
           {options.map(o => {
             const sel = o.value === value;
             return (
               <button
                 key={o.value}
                 type="button"
+                role="option"
+                aria-selected={sel}
                 onClick={() => { onValueChange(o.value); setOpen(false); }}
                 className={cn(
                   'w-full flex items-center justify-between px-3 py-3.5 rounded-lg text-sm text-left transition-colors min-h-[44px]',

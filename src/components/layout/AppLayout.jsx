@@ -15,10 +15,15 @@ export default function AppLayout() {
   });
 
   return (
-    <div className="min-h-screen bg-background" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="min-h-screen bg-background">
       <PushNotificationPromptModal />
-      <Navbar />
-      <MobileHeader />
+      <header
+        className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
+        <Navbar />
+        <MobileHeader />
+      </header>
       <main className="pb-20 md:pb-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 5rem)' }}>
         <Outlet />
       </main>

@@ -1,14 +1,3 @@
-import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
-
-const { appId, token, functionsVersion, appBaseUrl } = appParams;
-
-//Create a client with authentication required
-export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
-  serverUrl: '',
-  requiresAuth: false,
-  appBaseUrl
-});
+// Compatibility export while feature modules are migrated away from the old
+// backend name. Every operation is implemented by Supabase.
+export { backend as base44, supabase, isSupabaseConfigured } from './supabaseClient';

@@ -1,37 +1,54 @@
-**Welcome to your Base44 project** 
+# Milto Coffee
 
-**About**
+Milto Coffee is a Vite/React application backed by Supabase Auth, Postgres,
+Realtime, Storage, and Edge Functions.
 
-This project contains everything you need to run your app locally.
+## Local setup
 
-**Edit the code in your local development environment**
+1. Install dependencies with `npm install`.
+2. Create a Supabase project.
+3. Copy `.env.example` to `.env.local` and set:
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+   ```dotenv
+   VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+   VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+   ```
 
-**Prerequisites:** 
+   Older projects can use `VITE_SUPABASE_ANON_KEY` instead. Never expose a
+   Supabase secret/service-role key through a `VITE_` variable.
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+4. Apply `supabase/migrations/20260825000000_initial_milto_schema.sql` through
+   the Supabase SQL Editor or CLI.
+5. Add the local and deployed app URLs under Authentication > URL
+   Configuration.
+6. Run the app with `npm run dev`.
 
+The migration creates RLS-protected profiles and application entities, enables
+Realtime, and provisions the public `assets` bucket with authenticated upload
+policies.
+
+## Authentication
+
+Enable Google under Authentication > Providers to use Google login. The sign-up
+screen expects an email OTP; include `{{ .Token }}` in the Supabase confirmation
+email template so the six-digit code is delivered.
+
+Promote the first administrator from the Supabase SQL Editor:
+
+```sql
+update public.profiles set role = 'admin' where email = 'you@example.com';
 ```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
 
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
-```
+## Edge Functions
 
-Run the app: `npm run dev`
+Calls formerly handled by backend integrations now route to Supabase Edge
+Functions. Deploy and configure provider secrets for these function names before
+using the related features:
 
-**Publish your changes**
+- `send-email`
+- `sendPushNotifications`
+- `sendBirthdayOffers`
+- `getVapidPublicKey`
 
-Open [Base44.com](http://Base44.com) and click on Publish.
-
-**Docs & Support**
-
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+The compatibility adapter lives in `src/api/supabaseClient.js`, allowing the UI
+to keep its existing data-access calls during the migration.
